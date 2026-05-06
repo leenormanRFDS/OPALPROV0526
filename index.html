@@ -1,0 +1,2689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Opal Provenance Network &middot; v3.1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --font-display: 'Outfit', sans-serif;
+      --font-sans: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      
+      --bg: #050608;
+      --surf: #0F1218;
+      --surf2: #141922;
+      --surf3: #1B212E;
+      --bdr: rgba(255,255,255,0.06);
+      --bdr-hi: rgba(255,255,255,0.12);
+      --text: #F8FAFC;
+      --muted: #94A3B8;
+      --dim: #475569;
+      --gold: #D4AF37;
+      --gold-dim: rgba(212,175,55,0.1);
+      --teal: #2DD4BF;
+      --teal-dim: rgba(45,212,191,0.1);
+      --blue: #3B82F6;
+      --red: #EF4444;
+      --orange: #F59E0B;
+      --orange-dim: rgba(245,158,11,0.1);
+
+      --m1: #5C2015;
+      --m2: #7A3315;
+      --m3: #9C481A;
+      --m4: #B8621A;
+      --m5: #C88C24;
+      --m6: #96981E;
+      --m7: #4EA832;
+      --m8: #24A86C;
+      --m9: #10C896;
+    }
+
+    * {
+      font-family: var(--font-sans);
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    h1, h2, h3, h4, .font-display {
+      font-family: var(--font-display) !important;
+      letter-spacing: -0.02em;
+    }
+    
+    body {
+      background: var(--bg);
+      color: var(--text);
+      overflow: hidden;
+      display: flex;
+      height: 100vh;
+      letter-spacing: -0.01em;
+    }
+
+    .font-mono { font-family: 'JetBrains Mono', monospace !important; }
+
+    .data-table-container {
+      margin: 20px 24px;
+      background: #131720;
+      border: 1px solid rgba(100,120,180,0.12);
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .data-table-header-row {
+      background: rgba(100,120,180,0.05);
+      border-bottom: 1px solid rgba(100,120,180,0.12);
+    }
+
+    .data-table-header-row th {
+      padding: 12px 16px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #8B949E;
+      text-align: left;
+    }
+
+    .data-table-row {
+      border-bottom: 1px solid rgba(100,120,180,0.06);
+      transition: background 150ms;
+    }
+
+    .data-table-row:hover {
+      background: rgba(100,120,180,0.04);
+    }
+
+    .data-table-row td {
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #E6EDF3;
+      cursor: pointer;
+    }
+
+    .data-table-thumbnail {
+      width: 24px !important;
+      height: 24px !important;
+      border-radius: 4px;
+      object-fit: cover;
+      margin-right: 12px;
+      border: 1px solid rgba(100,120,180,0.2) !important;
+    }
+    
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+    
+    /* Input spinner hiding */
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+    @keyframes opn-fadein { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes opn-pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.05); } 100% { opacity: 1; transform: scale(1); } }
+    @keyframes opn-slideright { from { transform: translateX(-20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes opn-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes opn-mint-progress { from { width: 0%; } to { width: 100%; } }
+    @keyframes opn-glow-gold { 0% { box-shadow: 0 0 10px var(--gold-dim); border-color: var(--gold-dim); } 50% { box-shadow: 0 0 15px var(--gold); border-color: var(--gold); } 100% { box-shadow: 0 0 10px var(--gold-dim); border-color: var(--gold-dim); } }
+    @keyframes opn-variance-pulse { 0% { background: var(--red-dim); } 50% { background: rgba(248,81,73,0.3); } 100% { background: var(--red-dim); } }
+    @keyframes opn-cuff-pulse { 0% { box-shadow: 0 0 5px var(--teal-dim); transform: scale(1); } 50% { box-shadow: 0 0 25px var(--teal); transform: scale(1.02); } 100% { box-shadow: 0 0 5px var(--teal-dim); transform: scale(1); } }
+    .cobra-cuff-active { animation: opn-cuff-pulse 3s infinite ease-in-out; border-color: var(--teal) !important; }
+
+    /* AUTH GATE ENHANCEMENTS */
+    @keyframes floating {
+      0% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(2deg); }
+      100% { transform: translateY(0px) rotate(0deg); }
+    }
+    .floating-node {
+      position: absolute;
+      background: radial-gradient(circle, var(--gold) 0%, transparent 70%);
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      opacity: 0.3;
+      filter: blur(2px);
+      pointer-events: none;
+    }
+    
+    .nebula-bg {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 20% 30%, rgba(212,175,55,0.05) 0%, transparent 40%),
+                  radial-gradient(circle at 80% 70%, rgba(45,212,191,0.05) 0%, transparent 40%);
+      filter: blur(60px);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .stagger-in {
+      animation: opn-fadein 1s ease-out both;
+    }
+    .stagger-in:nth-child(1) { animation-delay: 0.1s; }
+    .stagger-in:nth-child(2) { animation-delay: 0.3s; }
+    .stagger-in:nth-child(3) { animation-delay: 0.5s; }
+
+  </style>
+
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js" crossorigin></script>
+  <script src="https://unpkg.com/prop-types/prop-types.min.js"></script>
+  <script src="https://unpkg.com/recharts@2.1.12/umd/Recharts.js" crossorigin></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+  <div id="root" class="w-full h-full flex overflow-hidden"></div>
+  <script>
+window.onerror = function(msg, url, line, col, error) {
+  console.error("Global Error: ", msg, " at ", line, ":", col, error);
+  // Show error on screen for debugging in preview
+  const root = document.getElementById('root');
+  if (root) {
+    root.innerHTML = `<div style="padding: 20px; color: red; font-family: monospace; background: white; position: relative; z-index: 9999;">
+      <h1>Runtime Error</h1>
+      <p style="font-weight: bold; color: black;">${msg}</p>
+      <pre>File: ${url}\nLine: ${line} Col: ${col}</pre>
+      ${error ? `<pre>${error.stack}</pre>` : ''}
+    </div>`;
+  }
+  return false;
+};
+  </script>
+  <script type="text/babel">
+console.log("Babel script starting execution...");
+const SEEDS = [
+  { id: 1, name: "Low Grade Soft Matrix", mk_ppg: 0.30, mk_ppc_cut: 1.50, mk_rough_total: 9.24, mk_cut_total: 231.00, mk_grade: 2, mr_offer: 0.62, mr_ppg_implied: 0.02, mr_grade: 1, wg: 30.8, ct: 154, brightness: "B6", bodyTone: "N7", pattern: "Pinfire", treatmentQuality: "Poor", stabilityRisk: "High", nft: false, img: "https://res.cloudinary.com/dkgqxred2/image/upload/v1777163110/LM2_nkylci.jpg" },
+  { id: 2, name: "High Saturation Matrix", mk_ppg: 3.00, mk_ppc_cut: null, mk_rough_total: 77.40, mk_cut_total: null, mk_grade: 4, mr_offer: null, mr_ppg_implied: 2.50, mr_grade: 3, wg: 25.8, ct: 129, brightness: "B4", bodyTone: "N5", pattern: "Flash", treatmentQuality: "Standard", stabilityRisk: "Medium", nft: false, img: "https://res.cloudinary.com/dkgqxred2/image/upload/v1777163115/1_lkkddr.jpg" },
+  { id: 3, name: "Low Grade Colour Concrete Treated", mk_ppg: 0.075, mk_ppc_cut: 0.38, mk_rough_total: 0.90, mk_cut_total: 22.88, mk_grade: 1, mr_offer: 0.24, mr_ppg_implied: 0.02, mr_grade: 1, wg: 12.04, ct: 60.2, brightness: "B7", bodyTone: "N8", pattern: "Pinfire", treatmentQuality: "Poor", stabilityRisk: "High", nft: false, img: "https://res.cloudinary.com/dkgqxred2/image/upload/v1777163115/LG1_lqks7p.jpg" },
+  { id: 4, name: "Low Grade Matrix", mk_ppg: 1.00, mk_ppc_cut: 7.50, mk_rough_total: 13.58, mk_cut_total: 509.25, mk_grade: 3, mr_offer: 20.00, mr_ppg_implied: 1.47, mr_grade: 2, wg: 13.58, ct: 67.9, brightness: "B6", bodyTone: "N7", pattern: "Pinfire", treatmentQuality: "Standard", stabilityRisk: "Medium", nft: false, img: "https://res.cloudinary.com/dkgqxred2/image/upload/v1777163115/IMG_4826_vvo5gb.jpg" },
+  { id: 5, name: "High Grade Colour Concrete Treated", mk_ppg: .75, mk_ppc_cut: 7.50, mk_rough_total: 21.51, mk_cut_total: 1072.50, mk_grade: 5, mr_offer: 0.57, mr_ppg_implied: 0.02, mr_grade: 1, wg: 28.60, ct: 143, brightness: "B3", bodyTone: "N4", pattern: "Flash", treatmentQuality: "High", stabilityRisk: "Low", nft: false, img: "https://res.cloudinary.com/dkgqxred2/image/upload/v1777219429/IMG_4875_xo12hj.png" },
+  { id: 6, name: "Mid Grade Hard Matrix", mk_ppg: 2.50, mk_ppc_cut: 20.00, mk_rough_total: 27.73, mk_cut_total: 1109.00, mk_grade: 4, mr_offer: 500.00, mr_ppg_implied: 45.09, mr_grade: 6, wg: 11.09, ct: 55.45, brightness: "B4", bodyTone: "N5", pattern: "Flash", treatmentQuality: "Standard", stabilityRisk: "Medium", nft: false, img: "https://res.cloudinary.com/dkgqxred2/image/upload/v1777163110/IMG_4824_a1cg0h.jpg" },
+  { id: 7, name: "Mid Grade High Colour Matrix", mk_ppg: 3.00, mk_ppc_cut: 30.00, mk_rough_total: 17.22, mk_cut_total: 861.00, mk_grade: 5, mr_offer: 600.00, mr_ppg_implied: 104.53, mr_grade: 7, wg: 5.74, ct: 28.7, brightness: "B3", bodyTone: "N4", pattern: "Ribbon", treatmentQuality: "High", stabilityRisk: "Low", nft: false, img: "https://res.cloudinary.com/dkgqxred2/image/upload/v1777183367/IMG_4822_jhvoa0.jpg" },
+  { id: 8, name: "High Grade Hard Matrix Treated", mk_ppg: 4.00, mk_ppc_cut: 45.00, mk_rough_total: 157.44, mk_cut_total: 8856.90, mk_grade: 6, mr_offer: 900.00, mr_ppg_implied: 22.86, mr_grade: 5, wg: 39.36, ct: 196.82, brightness: "B2", bodyTone: "N2", pattern: "Ribbon", treatmentQuality: "High", stabilityRisk: "Low", nft: false, img: "https://res.cloudinary.com/dkgqxred2/image/upload/v1777219431/IMG_4873_y9oofg.png" },
+  { id: 9, name: "High Grade Hard Matrix Untreated", mk_ppg: 5.00, mk_ppc_cut: 100.00, mk_rough_total: 920.00, mk_cut_total: 92000.00, mk_grade: 8, mr_offer: 500.00, mr_ppg_implied: 2.72, mr_grade: 3, wg: 184, ct: 920, brightness: "B1", bodyTone: "N1", pattern: "Harlequin", treatmentQuality: "High", stabilityRisk: "Low", nft: false, img: "https://res.cloudinary.com/dkgqxred2/image/upload/v1777219429/IMG_4876_r3cl1m.png" },
+  { id: 10, name: "Mid Grade Colour Concrete Treated", mk_ppg: 0.20, mk_ppc_cut: 0.75, mk_rough_total: 2.97, mk_cut_total: 55.61, mk_grade: 2, mr_offer: 0.30, mr_ppg_implied: 0.02, mr_grade: 1, wg: 14.83, ct: 74.15, brightness: "B4", bodyTone: "N5", pattern: "Flash", treatmentQuality: "Standard", stabilityRisk: "Medium", nft: false, img: "https://res.cloudinary.com/dkgqxred2/image/upload/v1777163112/MGC_s9ap7y.jpg" },
+  { id: 11, name: "High Grade Hard Matrix Small", mk_ppg: 3.50, mk_ppc_cut: 45.00, mk_rough_total: 20.65, mk_cut_total: 1327.50, mk_grade: 7, mr_offer: 700.00, mr_ppg_implied: 118.64, mr_grade: 8, wg: 5.9, ct: 29.5, brightness: "B2", bodyTone: "N2", pattern: "Ribbon", treatmentQuality: "High", stabilityRisk: "Low", nft: false, img: "https://res.cloudinary.com/dkgqxred2/image/upload/v1777163116/IMG_4816_lzlryn.jpg" },
+  { id: 12, name: "High Grade Hard Matrix Large", mk_ppg: 3.50, mk_ppc_cut: 45.00, mk_rough_total: 179.45, mk_cut_total: 11535.75, mk_grade: 7, mr_offer: 300.00, mr_ppg_implied: 5.85, mr_grade: 4, wg: 51.27, ct: 256.35, brightness: "B2", bodyTone: "N2", pattern: "Ribbon", treatmentQuality: "High", stabilityRisk: "Low", nft: false, img: "https://res.cloudinary.com/dkgqxred2/image/upload/v1777163110/IMG_4815_w0j9m6.jpg" }
+];
+
+const GRADE_COLORS = {
+  1: '#5C2015', 2: '#7A3315', 3: '#9C481A', 4: '#B8621A',
+  5: '#C88C24', 6: '#96981E', 7: '#4EA832', 8: '#24A86C', 9: '#10C896'
+};
+
+const B_SCORE = {B1:100,B2:85,B3:70,B4:55,B5:40,B6:25,B7:10};
+const N_SCORE = {N1:100,N2:88,N3:75,N4:62,N5:50,N6:38,N7:25,N8:12};
+const STB_INDEX_MAP = {Poor:20, Standard:60, High:95};
+
+const USERS = {
+  'mattk': {
+    id: 'mattk', name: 'Matt Kathagen', role: 'Miner · Origin Specialist',
+    color: 'var(--gold)', initials: 'MK', wallet: 'OPN-MK-GENESIS-001', desc: 'Andamooka · Genesis Mine'
+  },
+  'mattr': {
+    id: 'mattr', name: 'Matt Rogers', role: 'Cutter · Market Specialist',
+    color: 'var(--teal)', initials: 'MR', wallet: 'OPN-MR-HAHN-002', desc: 'Hahndorf · Opal Studio'
+  }
+};
+
+const formatCur = (v) => (v === null || v === undefined) ? 'N/A' : '$' + Number(v).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits:2});
+const formatNum = (v) => (v === null || v === undefined) ? 'N/A' : Number(v).toLocaleString('en-US', {minimumFractionDigits: 1, maximumFractionDigits:1});
+
+const CUSTODIAN_ASSETS = [
+  {
+    id: "CC-001",
+    type: "CUSTODIAN",
+    collection: "Cobra Cuff",
+    serialNumber: 1,
+    totalEdition: 20,
+    name: "Cobra Cuff No. 1 — Genesis Edition",
+    owner: "Matt Kathagen",
+    ownerRole: "Miner · Cobra Cuff Co-Founder",
+    maker: "Cobra Cuff ™ · Lee & Matt",
+    retailPrice: 2675,
+    currency: "AUD",
+    status: "HELD — NOT LISTED",
+    genesisAsset: true,
+    firstOnOPN: true,
+    mediaAppearance: "Outback Opal Hunters",
+    
+    stone: {
+      grade: 9,
+      carats: 20,
+      type: "Blue/Green Hard Matrix — Treated",
+      pattern: "Broadflash",
+      brightness: "B1",
+      miner: "Matt & Cozza Kathagen",
+      mine: "Mooka Boy Mine",
+      coordinates: { lat: -30.454699, lng: 137.189437 },
+      location: "Andamooka, South Australia",
+    },
+    
+    object: {
+      housing: "Reclaimed Andamooka mining steel",
+      housingMaker: "Andamooka community blacksmith",
+      cord: "Khaki paracord — field-ready",
+      clasp: "Military-grade tactical clasp",
+      engraving: "Crossed pickaxe marks — Mooka Boys insignia",
+      dimensions: "Adjustable wrist cuff",
+    },
+    
+    provenance: [
+      { step: 1, label: "Extracted",    detail: "Mooka Boy Mine · Andamooka SA",     coords: "-30.454699, 137.189437" },
+      { step: 2, label: "Treated",      detail: "Matt & Cozza Kathagen · Andamooka", date: "2026" },
+      { step: 3, label: "Set",          detail: "Community blacksmith · Andamooka",  date: "2026" },
+      { step: 4, label: "Assembled",    detail: "Cobra Cuff ™ · Lee & Matt",           date: "2026" },
+      { step: 5, label: "Certified",    detail: "AOSA M9 Standard",                  date: "2026" },
+      { step: 6, label: "Opal - Cut",   detail: "Matt Rogers",                       date: "2026" },
+      { step: 7, label: "Broadcast",    detail: "Outback Opal Hunters — global",     date: "2026" },
+      { step: 8, label: "Mint Pending", detail: "OPN · Polygon Network",             date: "2026" },
+    ],
+    
+    nft: false,
+    nft_value: 8025,
+    nft_image: "https://res.cloudinary.com/dkgqxred2/image/upload/v1777191838/openart-image_s4KRJWDf_1777191340348_raw_yssfes.png",
+    img: "https://res.cloudinary.com/dkgqxred2/image/upload/v1777219429/IMG_4875_xo12hj.png",
+  }
+];
+
+const RARITY_TIERS = {
+  Zenith: { label: 'Zenith', color: '#10C896', minGrade: 9, xp: 1000, multi: 5.0 },
+  Legendary: { label: 'Legendary', color: '#4EA832', minGrade: 7, xp: 250, multi: 2.5 },
+  Epic: { label: 'Epic', color: '#B8621A', minGrade: 5, xp: 100, multi: 1.8 },
+  Rare: { label: 'Rare', color: '#9C481A', minGrade: 3, xp: 50, multi: 1.3 },
+  Common: { label: 'Common', color: '#5C2015', minGrade: 1, xp: 20, multi: 1.0 }
+};
+
+const getRarity = (grade) => {
+  if (grade >= 9) return RARITY_TIERS.Zenith;
+  if (grade >= 7) return RARITY_TIERS.Legendary;
+  if (grade >= 5) return RARITY_TIERS.Epic;
+  if (grade >= 3) return RARITY_TIERS.Rare;
+  return RARITY_TIERS.Common;
+};
+
+const calculateDerived = (s) => {
+  const grade = s.mk_grade || 1;
+  const rarity = getRarity(grade);
+  const nft_value = s.mr_offer ? s.mr_offer * (grade >= 9 ? 1.8 : grade >= 8 ? 1.4 : grade >= 7 ? 1.2 : 1.1) : s.mk_rough_total * 1.1;
+  const div_pct_val = s.mr_offer && s.mk_rough_total ? ((s.mk_rough_total / s.mr_offer - 1) * 100) : null;
+  const divergence_pct = div_pct_val !== null ? div_pct_val.toFixed(1) + '%' : 'N/A';
+  const mr_ppg_implied_safe = s.mr_ppg_implied || 0;
+  return { ...s, nft_value, div_pct_val, divergence_pct, mr_ppg_implied_safe, rarity };
+};
+
+const AosaLogo = () => (
+  <svg viewBox="0 0 300 100" className="h-full">
+    <defs>
+      <linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stopColor="#fef582" />
+        <stop offset="50%" stopColor="#d7b453" />
+        <stop offset="100%" stopColor="#7f6c40" />
+      </linearGradient>
+    </defs>
+    <text x="0" y="45" fontFamily="DM Sans" fontWeight="800" fontSize="48" fill="url(#gold-grad)">AOSA</text>
+    <text x="135" y="25" fontFamily="DM Sans" fontWeight="800" fontSize="20" fill="url(#gold-grad)">™</text>
+    <rect x="0" y="60" width="160" height="1" fill="#C9A66B" fillOpacity="0.4" />
+    <text x="0" y="76" fontFamily="DM Sans" fontWeight="600" fontSize="7" letterSpacing="4" fill="#C9A66B">THE STANDARD</text>
+    <g transform="translate(180, 15) scale(0.8)">
+      <path d="M0,0 L30,25 L60,0 L45,0 L30,12 L15,0 Z" fill="#C9A66B" />
+      <path d="M-5,15 L30,45 L65,15 L50,15 L30,32 L10,15 Z" fill="#7A5C28" fillOpacity="0.75" />
+      <path d="M-10,30 L30,65 L70,30 L55,30 L30,52 L5,30 Z" fill="#3A3028" fillOpacity="0.45" />
+    </g>
+  </svg>
+);
+
+const { useState, useEffect, useMemo } = React;
+if (typeof Recharts === 'undefined') {
+  console.error("Recharts is not defined! Check if the script in index.html is loading correctly.");
+  // Provide a fallback or mock if needed to prevent crash, but better to know why it fails
+}
+const { ResponsiveContainer, ScatterChart, Scatter, XAxis, YAxis, ZAxis, Tooltip, Cell, BarChart, Bar, CartesianGrid, ReferenceLine, LabelList } = Recharts || {};
+
+const KpiStat = ({label, value, sub, color}) => (
+  <div className="glass-card rounded-xl p-6 flex flex-col justify-between border border-[var(--bdr)] hover:border-[var(--bdr-hi)] shadow-xl transition-all h-full bg-gradient-to-br from-white/[0.03] to-transparent relative overflow-hidden group">
+    <div className="absolute top-0 right-0 p-3 opacity-[0.03] pointer-events-none text-[84px] font-display translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform duration-700">⬡</div>
+    <div className="relative z-10">
+      <div className="text-[10px] font-bold uppercase text-[var(--muted)] tracking-[0.2em] mb-4 font-display">{label}</div>
+      <div className="text-[34px] font-light tracking-tighter leading-none mb-1 font-display transition-all group-hover:tracking-normal duration-500" style={{color, textShadow: `0 0 25px ${color}44` }}>{value}</div>
+      {sub && <div className="text-[10px] text-[var(--dim)] font-bold mt-2 uppercase tracking-[0.14em] font-display opacity-60">{sub}</div>}
+    </div>
+  </div>
+);
+
+const Badge = ({label, color}) => (
+  <span className="inline-block px-2.5 py-0.5 text-[10px] font-bold uppercase rounded-md tracking-wider border" style={{color, borderColor: `${color}44`, backgroundColor: `${color}11`}}>{label}</span>
+);
+
+const DEFAULT_STONES = SEEDS.map(calculateDerived);
+
+const AuthGate = ({ setLogin }) => {
+  const [loading, setLoading] = useState(null);
+  
+  const handleLogin = (id) => {
+    setLoading(id);
+    setTimeout(() => setLogin(USERS[id]), 900);
+  };
+
+  return (
+    <div className="w-full h-full bg-[var(--bg)] flex items-center justify-center p-6 fixed inset-0 z-50 overflow-y-auto">
+      <div className="max-w-4xl w-full flex flex-col items-center py-12">
+        <div className="h-16 mb-8"><AOSA_Logo_Scaled /></div>
+        <h1 className="text-4xl font-light text-[var(--text)] mb-3 font-display tracking-tight text-center">Opal Provenance <span className="opacity-40">Network</span></h1>
+        <p className="text-[11px] font-bold uppercase text-[var(--muted)] tracking-[0.25em] mb-12 font-display opacity-80">Andamooka &middot; South Australia &middot; Est 2026</p>
+        
+        <div className="flex flex-col md:flex-row gap-8">
+          {Object.values(USERS).map(u => (
+            <div 
+              key={u.id}
+              onClick={() => handleLogin(u.id)}
+              className="w-[300px] rounded-2xl bg-[var(--surf)] border border-[var(--bdr)] p-8 cursor-pointer transform transition-all duration-300 hover:-translate-y-2 hover:border-[var(--gold-dim)] group relative overflow-hidden"
+              style={{ '--btn-hover': u.color }}
+            >
+              <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none text-[64px] font-display">⬡</div>
+              <div className="flex items-center gap-5 mb-8">
+                <div 
+                  className="w-[60px] h-[60px] rounded-full flex items-center justify-center font-light text-2xl bg-opacity-10 font-display transition-transform group-hover:scale-105"
+                  style={{ color: u.color, background: `linear-gradient(135deg, ${u.color}22, ${u.color}00)`, border: `1px solid ${u.color}33` }}
+                >
+                  {u.initials}
+                </div>
+                <div>
+                  <div className="font-light text-xl font-display tracking-tight leading-none mb-1">{u.name.split(' ')[0]}</div>
+                  <div className="text-[10px] font-bold uppercase tracking-[0.18em] font-display" style={{color: u.color}}>{u.role}</div>
+                </div>
+              </div>
+              
+              <div className="flex justify-between items-center mb-8 text-[11px] bg-black/20 p-3 rounded-lg border border-white/5">
+                <span className="text-[var(--muted)] font-bold uppercase tracking-widest font-display text-[9px]">Network ID</span>
+                <span className="font-mono text-[var(--dim)]">{u.wallet.slice(0,6)}...{u.wallet.slice(-4)}</span>
+              </div>
+              
+              <div className="flex items-center gap-2 text-[10px] uppercase font-bold mb-10 font-display tracking-[0.14em]" style={{color: u.color}}>
+                <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{backgroundColor: u.color}}></div>
+                Full Protocol Access
+              </div>
+              
+              <button 
+                className="w-full py-4 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-3 font-display uppercase tracking-widest"
+                style={{
+                  border: `1px solid ${u.color}44`, 
+                  background: `${u.color}08`,
+                  color: u.color
+                }}
+              >
+                {loading === u.id ? (
+                  <><span className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin" style={{borderColor: u.color, borderTopColor: 'transparent'}}></span> Connecting</>
+                ) : (
+                  <>Connect &rarr;</>
+                )}
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const AOSA_Logo_Scaled = () => <AosaLogo />;
+
+const MintModal = ({ stone, nftVal, onConfirm, onCancel }) => {
+  const [step, setStep] = useState(1);
+  
+  const handleConfirm = () => {
+    setStep(2);
+    setTimeout(() => setStep(3), 1800);
+  };
+  
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[rgba(7,10,18,0.9)] backdrop-blur-md animate-[opn-fadein_0.2s_ease-out]">
+      <div className="w-[420px] bg-[var(--surf)] border border-[var(--bdr-hi)] rounded-2xl overflow-hidden shadow-2xl flex flex-col relative">
+        {step === 1 && (
+          <div className="animate-[opn-fadein_0.2s_ease-out]">
+            <img src={stone.genesis ? stone.nft_img : stone.img} className="w-full h-[180px] object-cover" />
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="font-medium text-xl tracking-tight font-display">{stone.name}</h3>
+                <div className="px-2 py-0.5 rounded text-[10px] font-bold bg-[var(--surf3)] border border-[var(--bdr)] uppercase tracking-wider" style={{color: GRADE_COLORS[stone.mk_grade]}}>
+                  M{stone.mk_grade}
+                </div>
+              </div>
+              
+              <div className="space-y-3 mb-6 text-sm">
+                <div className="flex justify-between"><span className="text-[var(--muted)]">Rough Value</span><span className="font-mono">{formatCur(stone.mk_rough_total)}</span></div>
+                <div className="flex justify-between"><span className="text-[var(--muted)]">Cutter Offer</span><span className="font-mono">{formatCur(stone.mr_offer)}</span></div>
+                <div className="flex justify-between"><span className="text-[var(--muted)]">Premium %</span><span className="font-mono text-[var(--teal)]">+{((nftVal / (stone.mr_offer || stone.mk_rough_total) - 1) * 100).toFixed(0)}%</span></div>
+                <div className="flex justify-between pt-4 border-t border-[var(--bdr)] items-end">
+                  <span className="text-[10px] uppercase font-bold text-[var(--muted)] tracking-widest font-display">Mint Value Est.</span>
+                  <span className="font-light text-[var(--gold)] text-3xl font-display leading-none tracking-tighter">{formatCur(nftVal)}</span>
+                </div>
+              </div>
+              
+              {stone.genesis && (
+                <div className="mb-6 p-3 rounded bg-[var(--surf2)] border border-[var(--gold-dim)] text-xs text-[var(--gold)]">
+                  Both graders confirm M9. NFT value anchored to consensus.
+                </div>
+              )}
+              
+              <div className="flex gap-3">
+                <button onClick={onCancel} className="flex-1 py-3 text-sm font-bold text-[var(--muted)] hover:text-white transition-colors rounded-lg bg-[var(--surf2)]">Cancel</button>
+                <button onClick={handleConfirm} className="flex-1 py-3 text-sm font-bold text-[var(--teal)] bg-[var(--teal-dim)] border border-[var(--teal)] rounded-lg hover:bg-opacity-30 transition-all flex items-center justify-center gap-2">
+                  <span className="text-xs">◆</span> Confirm Mint
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {step === 2 && (
+          <div className="p-12 flex flex-col items-center justify-center h-[400px] animate-[opn-fadein_0.2s_ease-out]">
+            <div className="w-12 h-12 rounded-full border-4 border-[var(--surf3)] border-t-[var(--teal)] animate-[opn-spin_1s_linear_infinite] mb-6"></div>
+            <h3 className="text-base font-bold text-[var(--text)] mb-1">Minting on Polygon...</h3>
+            <p className="text-xs text-[var(--muted)] mb-8">Creating provenance certificate</p>
+            <div className="w-full h-1 bg-[var(--surf3)] rounded-full overflow-hidden">
+              <div className="h-full bg-[var(--teal)] animate-[opn-mint-progress_1.8s_linear_forwards]"></div>
+            </div>
+          </div>
+        )}
+        
+        {step === 3 && (
+          <div className="p-12 flex flex-col items-center justify-center text-center animate-[opn-fadein_0.2s_ease-out]">
+            <div className="text-4xl text-[var(--teal)] mb-4 font-bold">◆</div>
+            <h3 className="text-2xl font-light text-[var(--teal)] mb-1 font-display tracking-tight">NFT Minted!</h3>
+            <p className="text-[13px] font-medium text-[var(--muted)] mb-8 font-display uppercase tracking-widest">{stone.name}</p>
+            <div className="text-4xl font-light text-[var(--gold)] mb-10 font-display leading-none tracking-tighter">{formatCur(nftVal)}</div>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--dim)] mb-8 leading-relaxed font-semibold">Certificate Recorded ◉ Polygon Network<br/>AOSA Verified Provenance</p>
+            <button onClick={() => { onConfirm(); }} className="w-full py-4 text-sm font-bold text-white bg-[var(--surf3)] hover:bg-[var(--bdr-hi)] transition-colors rounded-xl font-display uppercase tracking-widest">
+              View Collection &rarr;
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const PortfolioView = ({ data, user, onSelect, profile }) => {
+  const isK = user.id === 'mattk';
+  const totK = data.reduce((sum, s) => sum + s.mk_rough_total, 0);
+  const totR = data.reduce((sum, s) => sum + (s.mr_offer || 0), 0);
+  const avgG = data.reduce((sum, s) => sum + (isK ? s.mk_grade : s.mr_grade), 0) / data.length;
+  const consen = data.filter(s => s.mk_grade && s.mr_grade && Math.abs(s.mk_grade - s.mr_grade) <= 1).length;
+  const discoveries = data.filter(s => s.discovered).length;
+  
+  const metricColor = isK ? 'var(--gold)' : 'var(--teal)';
+
+  return (
+    <div className="flex flex-col gap-6 animate-[opn-fadein_0.3s_cubic-bezier(0.4, 0, 0.2, 1)]">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="glass-card bg-gradient-to-br from-[var(--gold-dim)] to-transparent rounded-2xl p-6 border border-[var(--gold-dim)] flex flex-col justify-between group">
+           <div className="flex justify-between items-start mb-4">
+              <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--gold)] font-display">Genesis Collection</div>
+              <div className="text-[10px] font-mono text-[var(--gold)]">{data.filter(s => s.genesis).length} / 12</div>
+           </div>
+           <div className="w-full h-1 bg-black/40 rounded-full overflow-hidden mb-4">
+              <div className="h-full bg-[var(--gold)]" style={{ width: `${(data.filter(s => s.genesis).length / 12) * 100}%` }}></div>
+           </div>
+           <div className="text-[11px] text-[var(--muted)] font-medium">Complete the Genesis set to unlock the "Genesis Miner" title.</div>
+        </div>
+        <div className="glass-card bg-gradient-to-br from-[var(--teal-dim)] to-transparent rounded-2xl p-6 border border-[var(--teal-dim)] flex flex-col justify-between group">
+           <div className="flex justify-between items-start mb-4">
+              <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--teal)] font-display">AI Discoveries</div>
+              <div className="text-[10px] font-mono text-[var(--teal)]">{discoveries} FOUND</div>
+           </div>
+           <div className="flex -space-x-3 mb-4">
+              {data.filter(s => s.discovered).slice(0, 5).map((s, i) => (
+                <img key={s.id} src={s.img} className="w-8 h-8 rounded-full border-2 border-[var(--bg)] object-cover shadow-lg" alt="Discovery" />
+              ))}
+              {discoveries > 5 && <div className="w-8 h-8 rounded-full bg-[var(--surf3)] border-2 border-[var(--bg)] flex items-center justify-center text-[8px] font-bold text-[var(--teal)]">+{discoveries - 5}</div>}
+              {discoveries === 0 && <div className="text-[11px] text-[var(--dim)] italic">No discoveries yet...</div>}
+           </div>
+           <div className="text-[11px] text-[var(--muted)] font-medium">Use VerifyAI™ to discover rare rough opals in the field.</div>
+        </div>
+        <div className="glass-card bg-gradient-to-br from-white/[0.03] to-transparent rounded-2xl p-6 border border-[var(--bdr)] flex flex-col justify-between group">
+           <div className="flex justify-between items-start mb-4">
+              <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)] font-display">Mastery Level</div>
+              <div className="text-[10px] font-mono text-white">XP {profile.xp}</div>
+           </div>
+           <div className="flex justify-between items-end mb-1">
+              <span className="text-[18px] font-light text-white font-display">Rank: {profile.level < 5 ? 'Novice' : profile.level < 10 ? 'Scout' : 'Expert'}</span>
+              <span className="text-[10px] font-bold text-[var(--gold)]">LVL {profile.level}</span>
+           </div>
+           <div className="w-full h-1 bg-black/40 rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-[var(--gold)] to-[var(--teal)]" style={{ width: `${(profile.xp / (profile.level * 1000)) * 100}%` }}></div>
+           </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <KpiStat label={isK ? "TOTAL MINER BOOK" : "MINER ROUGH TOTAL"} value={formatCur(totK)} color="var(--gold)" />
+        <KpiStat label={isK ? "TOTAL CUTTER OFFERS" : "CUTTER OFFER BOOK"} value={formatCur(totR)} color="var(--teal)" />
+        <KpiStat label="AVERAGE GRADE" value={`M${avgG.toFixed(1)}`} color={GRADE_COLORS[Math.round(avgG)] || '#94A3B8'} />
+        <KpiStat label="DISCOVERED" value={discoveries} sub="VerifyAI™ Yield" color="var(--teal)" />
+        <KpiStat label="CONSENSUS STONES" value={consen} sub="Grades within ±1" color="var(--blue)" />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:h-[300px]">
+        <div className="glass-card rounded-xl p-6 flex flex-col">
+          <div className="text-[11px] font-bold tracking-[0.1em] uppercase text-[var(--muted)] mb-6 flex items-center justify-between">
+            <span>Market Signal vs Quality</span>
+            <span className="text-[var(--dim)] font-mono">OPN-V3.1 &middot; LIVE</span>
+          </div>
+          <div className="flex-1 min-h-0">
+            <ResponsiveContainer width="100%" height="100%">
+              <ScatterChart margin={{ top:0, right:10, bottom:0, left:-20 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis type="number" dataKey="mS" domain={[0,105]} tick={{fill:'var(--muted)', fontSize:10, fontWeight: 500}} axisLine={false} tickLine={false} />
+                <YAxis type="number" dataKey="qS" domain={[0,105]} tick={{fill:'var(--muted)', fontSize:10, fontWeight: 500}} axisLine={false} tickLine={false} />
+                <ZAxis type="number" dataKey="sZ" range={[40, 240]} />
+                <Tooltip cursor={{strokeDasharray:'4 4', stroke: 'rgba(255,255,255,0.1)'}} content={({active,payload})=>{
+                  if(!active || !payload?.length) return null;
+                  const d = payload[0].payload;
+                  return (
+                    <div className="glass p-3 rounded-lg shadow-2xl border border-[var(--bdr-hi)] min-w-[140px] animate-[opn-fadein_0.1s_ease-out]">
+                      <div className="font-bold text-[13px] mb-1">{d.name}</div>
+                      <div className="flex justify-between items-center text-[11px] font-mono">
+                        <span className="text-[var(--muted)]">Grade:</span>
+                        <span style={{color: GRADE_COLORS[d.g]}}>M{d.g}</span>
+                      </div>
+                    </div>
+                  );
+                }} />
+                <Scatter data={data.map(s => ({
+                  ...s, mS: Number((s.mr_ppg_implied_safe/474.11)*100).toFixed(1),
+                  qS: Number(((B_SCORE[s.brightness]+N_SCORE[s.bodyTone])/2).toFixed(1)),
+                  sZ: s.wg, g: isK ? s.mk_grade : s.mr_grade
+                }))} animationDuration={1000} onClick={(e) => e && e.id && onSelect(e.id)}>
+                  {data.map((entry, idx) => (
+                    <Cell key={`cell-${idx}`} fill={GRADE_COLORS[isK ? entry.mk_grade : entry.mr_grade]} className="cursor-pointer hover:opacity-80 transition-opacity" />
+                  ))}
+                </Scatter>
+              </ScatterChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="glass-card rounded-xl p-6 flex flex-col">
+          <div className="text-[11px] font-bold tracking-[0.1em] uppercase text-[var(--muted)] mb-6 flex items-center justify-between">
+            <span>Grade Distribution Matrix</span>
+            <span className="text-[var(--dim)] font-mono">AOSA STATS</span>
+          </div>
+          <div className="flex-1 min-h-0">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={[1,2,3,4,5,6,7,8,9].map(g => ({
+                g: `M${g}`, val: data.filter(s => (isK ? s.mk_grade : s.mr_grade) === g).length, rawNum: g
+              }))} margin={{ top:0, right:10, bottom:0, left:-20 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="g" tick={{fill:'var(--muted)', fontSize:10, fontWeight: 500}} axisLine={false} tickLine={false} />
+                <YAxis tick={{fill:'var(--muted)', fontSize:10, fontWeight: 500}} axisLine={false} tickLine={false} allowDecimals={false} />
+                <Tooltip cursor={{fill:'rgba(255,255,255,0.02)'}} contentStyle={{backgroundColor:'rgba(15,18,24,0.9)', borderRadius: '8px', border:'1px solid var(--bdr-hi)', fontSize: '11px'}} itemStyle={{color:'var(--text)'}} />
+                <Bar dataKey="val" radius={[4,4,0,0]} animationDuration={1200}>
+                  {[1,2,3,4,5,6,7,8,9].map((g, i) => <Cell key={i} fill={GRADE_COLORS[g]} className="hover:opacity-80 transition-opacity" />)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      <div className="data-table-container shadow-2xl">
+        <div style={{ padding: '14px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '10px', fontWeight: 600, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--muted)', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--bdr)' }} className="font-display">
+          <span>Asset Inventory</span>
+          <span className="font-mono text-[9px] opacity-60">{data.length} RECORDS</span>
+        </div>
+        <div className="overflow-x-auto bg-[var(--bg)]">
+          <table className="w-full text-left whitespace-nowrap">
+            <thead>
+              <tr className="data-table-header-row">
+                <th style={{ width: '320px' }}>Asset & Specification</th>
+                <th>Grade</th>
+                <th className="font-mono">Mkt Score</th>
+                <th className="font-mono">Qly Score</th>
+                <th className="font-mono">Stability</th>
+                <th style={{ textAlign: 'right', color: 'var(--gold)' }}>Miner Book</th>
+                <th style={{ textAlign: 'right', color: 'var(--teal)' }}>Cutter Offer</th>
+                <th style={{ textAlign: 'right' }}>Divergence</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.map(s => {
+                const isUnderValued = s.mr_offer > s.mk_rough_total;
+                const mS = (s.mr_ppg_implied_safe/474.11*100).toFixed(1);
+                const qS = ((B_SCORE[s.brightness]+N_SCORE[s.bodyTone])/2).toFixed(1);
+                const gColor = GRADE_COLORS[isK ? s.mk_grade : s.mr_grade];
+                return (
+                  <tr key={s.id} onClick={()=>onSelect(s.id)} className="data-table-row group">
+                    <td className="flex items-center">
+                      <div className="relative">
+                        <img src={s.img} className="data-table-thumbnail" />
+                        {s.nft && <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[var(--teal)] rounded-full border border-[var(--bg)] shadow-[0_0_6px_var(--teal)]"></div>}
+                      </div>
+                      <div>
+                        <div className="font-semibold text-[13px] tracking-tight group-hover:text-[var(--gold)] transition-colors">{s.name}</div>
+                        <div className="text-[10px] text-[var(--dim)] font-medium uppercase tracking-wide">{s.ct}ct &middot; {s.pattern} Play of Colour</div>
+                      </div>
+                    </td>
+                    <td>
+                      <div className="flex flex-col gap-0.5">
+                        <Badge label={`M${isK ? s.mk_grade : s.mr_grade}`} color={gColor} />
+                        {s.rarity && (
+                          <span className="text-[7px] font-bold uppercase tracking-tighter opacity-80" style={{ color: s.rarity.color }}>
+                            {s.rarity.label}
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="font-mono text-[11px] font-medium text-[var(--muted)]">{mS}</td>
+                    <td className="font-mono text-[11px] font-medium text-[var(--muted)]">{qS}</td>
+                    <td className="font-mono text-[11px] font-medium">
+                      <span className={s.stabilityRisk === 'High' ? 'text-[var(--red)]' : s.stabilityRisk === 'Medium' ? 'text-[var(--orange)]' : 'text-[var(--teal)]'}>
+                        {STB_INDEX_MAP[s.treatmentQuality]}
+                      </span>
+                    </td>
+                    <td className="font-mono text-[11px] font-bold text-right text-[var(--gold)]">{formatCur(s.mk_rough_total)}</td>
+                    <td className="font-mono text-[11px] font-bold text-right text-[var(--teal)]">{formatCur(s.mr_offer)}</td>
+                    <td className="font-mono text-[11px] text-right">
+                      {isUnderValued ? (
+                        <div className="text-[var(--blue)] font-bold flex items-center justify-end gap-1.5"><span className="text-[9px] translate-y-[0.5px] tracking-tighter">PREMIUM</span>&Delta;</div>
+                      ) : (
+                        <div className="font-bold" style={{color: s.div_pct_val >= 100 ? 'var(--red)' : s.div_pct_val >= 10 ? 'var(--orange)' : 'var(--teal)'}}>
+                          {s.divergence_pct}
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const DetailPanel = ({ stone, user, onClose, onMint }) => {
+  const isOpen = !!stone;
+
+  return (
+    <>
+      {isOpen && <div className="md:hidden fixed inset-0 bg-black/80 z-30 backdrop-blur-sm" onClick={onClose}></div>}
+      <div style={{
+        width: isOpen ? '400px' : '0px',
+        minWidth: isOpen ? '400px' : '0px',
+        flexShrink: 0,
+        height: '100vh',
+        overflowY: isOpen ? 'auto' : 'hidden',
+        overflowX: 'hidden',
+        background: 'var(--surf)',
+        borderLeft: isOpen ? '1px solid var(--bdr-hi)' : 'none',
+        transform: isOpen ? 'translateX(0)' : 'translateX(400px)',
+        transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)',
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'relative',
+        zIndex: 40
+      }} className="fixed md:static inset-y-0 right-0 shadow-2xl md:shadow-none glass">
+        
+        {isOpen && (
+          <>
+            <div className="p-5 border-b border-[var(--bdr)] flex justify-between items-center bg-black/20 shrink-0 backdrop-blur-xl">
+              <div>
+                <div className="font-medium text-[16px] tracking-tight font-display">{stone.name}</div>
+                <div className="text-[10px] text-[var(--muted)] font-mono uppercase tracking-widest mt-0.5 opacity-60">Andamooka Matrix &middot; #{stone.id}</div>
+              </div>
+              <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors text-xl font-light text-[var(--muted)] hover:text-white">&times;</button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto custom-scrollbar">
+              {(() => {
+                const isK = user.id === 'mattk';
+                const gColor = GRADE_COLORS[isK ? stone.mk_grade : stone.mr_grade];
+                const avg = ((stone.mk_grade + stone.mr_grade)/2).toFixed(1);
+                const gap = Math.abs(stone.mk_grade - stone.mr_grade);
+                return (
+                  <>
+                    <div className="p-8 text-center border-b border-[var(--bdr)] pb-10 relative overflow-hidden bg-black/10">
+                      <div className="absolute inset-x-0 top-0 h-32 opacity-20" style={{background: `radial-gradient(circle at center, ${gColor} 0%, transparent 70%)`}}></div>
+                      <div className="text-[92px] font-light leading-none tracking-tighter font-display" style={{color: gColor, textShadow: `0 0 40px ${gColor}33`}}>M{isK ? stone.mk_grade : stone.mr_grade}</div>
+                      <div className="text-[10px] font-semibold uppercase tracking-[0.25em] mt-3 mb-8 font-display" style={{color: gColor}}>
+                        {stone[isK?'mk_grade':'mr_grade'] >= 8 ? 'Gem Grade \u2022 Ultra High' : stone[isK?'mk_grade':'mr_grade'] >= 5 ? 'Solid Matrix \u2022 Colour Variant' : 'Mining Grade'}
+                      </div>
+                      <div className="flex gap-1.5 h-1.5 px-4">
+                        {[1,2,3,4,5,6,7,8,9].map(i => (
+                          <div key={i} className="flex-1 rounded-full transition-all duration-500" style={{backgroundColor: i <= (isK ? stone.mk_grade : stone.mr_grade) ? gColor : 'var(--surf3)', boxShadow: i <= (isK ? stone.mk_grade : stone.mr_grade) ? `0 0 10px ${gColor}66` : 'none'}}></div>
+                        ))}
+                      </div>
+                      <div className="text-right text-[9px] uppercase text-[var(--dim)] mt-3 font-bold tracking-widest font-mono">Standard Grade Index</div>
+                    </div>
+
+                    {stone.genesis ? (
+                      <div className="m-6 rounded-2xl overflow-hidden border border-[var(--gold)] shadow-[0_10px_40px_-15px_rgba(212,175,55,0.4)] relative group cursor-pointer">
+                        <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg)] via-transparent opacity-90 group-hover:opacity-70 transition-opacity"></div>
+                        <img src={stone.nft_img} className="w-full h-[220px] object-cover scale-105 group-hover:scale-110 transition-transform duration-700" />
+                        <div className="absolute bottom-5 left-5 right-5">
+                          <div className="text-[10px] text-[var(--gold)] font-bold tracking-[0.2em] mb-1.5 font-display uppercase">◆ Genesis Provenance NFT</div>
+                          <div className="text-[42px] font-light text-white leading-none tracking-tighter mb-2 font-display" style={{textShadow: '0 2px 20px rgba(0,0,0,0.5)'}}>{formatCur(stone.nft_value)}</div>
+                          <div className="text-[10px] font-mono text-[var(--muted)] flex items-center gap-2 opacity-80">
+                             <span className="w-1.5 h-1.5 rounded-full bg-[var(--teal)] animate-pulse"></span>
+                             Polygon Mainnet &middot; L1_OPN_001
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="m-6 rounded-2xl overflow-hidden border border-[var(--bdr-hi)] relative">
+                        <img src={stone.img} className="w-full h-[180px] object-cover" />
+                        <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-[var(--surf)] to-transparent"></div>
+                      </div>
+                    )}
+
+                    <div className="px-6 py-2 divide-y divide-[var(--bdr)] text-[12px]">
+                      {[['Specification', `${stone.ct}ct \u00B7 ${stone.wg}g Gross`],
+                        ['Miner Value', <span className="text-[var(--gold)] font-bold">{formatCur(stone.mk_rough_total)}</span>],
+                        ['Cutter Offer', <span className="text-[var(--teal)] font-bold">{stone.mr_offer ? formatCur(stone.mr_offer) : '--'}</span>],
+                        ['Brightness', <span className="font-bold">{stone.brightness} {stone.bodyTone}</span>],
+                        ['Pattern', <span className="font-bold uppercase tracking-tight">{stone.pattern}</span>],
+                        ['Treatment', <span className="uppercase font-bold tracking-tight">{stone.treatmentQuality}</span>],
+                        ['Stability', <span className={`font-bold uppercase ${stone.stabilityRisk==='High'?'text-[var(--red)]':stone.stabilityRisk==='Medium'?'text-[var(--orange)]':'text-[var(--teal)]'}`}>{stone.stabilityRisk}</span>]].map(([k,v]) => (
+                        <div key={k} className="flex justify-between py-4 items-center">
+                          <span className="text-[var(--muted)] font-bold text-[10px] uppercase tracking-widest">{k}</span>
+                          <span className="font-mono text-[11px] text-right">{v}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="p-6 border-t border-[var(--bdr-hi)] bg-black/10">
+                      <div className="text-[10px] uppercase tracking-[0.2em] text-[var(--dim)] font-bold mb-6 font-display">Expert Assessments</div>
+                      <div className="space-y-6">
+                        <div className="flex items-center gap-4 group">
+                          <div className="w-10 h-10 rounded-full bg-[var(--gold-dim)] text-[var(--gold)] font-bold text-[11px] flex items-center justify-center border border-[var(--gold)] shadow-[0_0_15px_var(--gold-dim)] transition-transform group-hover:scale-105">MK</div>
+                          <div className="flex-1">
+                            <div className="text-[12px] font-bold tracking-tight">Matt Kathagen &middot; Origin Grader</div>
+                            <div className="flex gap-1 mt-1.5 items-center">
+                              {[1,2,3,4,5,6,7,8,9].map(i => <div key={i} className="w-2.5 h-1 rounded-full transition-all" style={{backgroundColor: i<=stone.mk_grade?GRADE_COLORS[stone.mk_grade]:'var(--surf3)'}}></div>)}
+                              <span className="text-[11px] ml-2 font-mono font-bold" style={{color: GRADE_COLORS[stone.mk_grade]}}>M{stone.mk_grade}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4 group">
+                          <div className="w-10 h-10 rounded-full bg-[var(--teal-dim)] text-[var(--teal)] font-bold text-[11px] flex items-center justify-center border border-[var(--teal)] shadow-[0_0_15px_var(--teal-dim)] transition-transform group-hover:scale-105">MR</div>
+                          <div className="flex-1">
+                            <div className="text-[12px] font-bold tracking-tight">Matt Rogers &middot; Market Grader</div>
+                            <div className="flex gap-1 mt-1.5 items-center">
+                              {[1,2,3,4,5,6,7,8,9].map(i => <div key={i} className="w-2.5 h-1 rounded-full transition-all" style={{backgroundColor: i<=stone.mr_grade?GRADE_COLORS[stone.mr_grade]:'var(--surf3)'}}></div>)}
+                              <span className="text-[11px] ml-2 font-mono font-bold" style={{color: GRADE_COLORS[stone.mr_grade]}}>M{stone.mr_grade}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="mt-8 bg-white/[0.03] border border-[var(--bdr)] rounded-xl p-4 flex flex-col items-center">
+                        <div className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest mb-1 font-display">AOSA Consensus</div>
+                        <div className="text-3xl font-medium tracking-tighter font-display">M{avg}</div>
+                        <div className="text-[10px] font-bold mt-2 px-3 py-1 rounded-full border" style={{
+                          color: gap===0?'var(--teal)':gap>=3?'var(--red)':'var(--orange)',
+                          borderColor: gap===0?'var(--teal-dim)':gap>=3?'var(--red-dim)':'var(--orange-dim)',
+                          backgroundColor: gap===0?'var(--teal-dim)':gap>=3?'var(--red-dim)':'var(--orange-dim)'
+                        }}>
+                          {gap===0 ? '✓ UNIFIED GRADE' : gap>=3 ? '⚠ HIGH DIVERGENCE' : `GRADE GAP: ${gap}`}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-6 border-t border-[var(--bdr-hi)] pb-12">
+                      {stone.nft ? (
+                        <div className="p-5 bg-[var(--teal-dim)] border border-[var(--teal)] rounded-xl text-center shadow-[0_10px_20px_-5px_rgba(45,212,191,0.2)]">
+                          <div className="text-[11px] font-black text-[var(--teal)] uppercase tracking-wider mb-1">Provenance Certificate Verified</div>
+                          <div className="text-[10px] text-[var(--muted)] font-medium">Recorded on blockchain &middot; Valuation Locked</div>
+                        </div>
+                      ) : (
+                        <button onClick={()=>onMint(stone)} className="w-full py-5 rounded-xl border-2 border-dashed border-[var(--gold)] bg-[var(--gold-dim)] text-[var(--gold)] hover:bg-[var(--gold)]/20 transition-all flex flex-col items-center gap-1.5 focus:scale-95 tactile-btn">
+                          <span className="font-medium text-[14px] uppercase tracking-[0.15em] flex items-center gap-2 font-display">
+                             <span className="text-xs">◆</span> Mint NFT provenance
+                          </span>
+                          <span className="text-[10px] font-mono opacity-60 font-medium tracking-tight">Anchored Est: {formatCur(stone.nft_value)}</span>
+                        </button>
+                      )}
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
+          </>
+        )}
+      </div>
+    </>
+  );
+};
+
+const DirectoryView = ({ data, user, onSelect, onMint }) => (
+  <div className="data-table-container animate-[opn-fadein_0.18s_ease-out] shadow-2xl">
+    <div style={{ padding: '14px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '10px', fontWeight: 600, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--muted)', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--bdr)' }} className="font-display">
+      <span>Master Directory</span>
+      <span className="font-mono text-[9px] opacity-60">{data.length} ASSETS</span>
+    </div>
+    <div className="overflow-x-auto bg-[#131720]">
+      <table className="w-full text-left whitespace-nowrap">
+        <thead>
+          <tr className="data-table-header-row">
+            <th style={{ width: '240px' }} className="font-display font-medium uppercase tracking-widest text-[9px]">Asset & Details</th>
+            <th className="font-display font-medium uppercase tracking-widest text-[9px]">Grade Profile</th>
+            <th className="font-display font-medium uppercase tracking-widest text-[9px]">Current Value</th>
+            <th className="font-display font-medium uppercase tracking-widest text-[9px]">Stability Index</th>
+            <th style={{ textAlign: 'right' }} className="font-display font-medium uppercase tracking-widest text-[9px]">Network Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map(s => {
+            const isK = user.id === 'mattk';
+            const gColor = GRADE_COLORS[isK ? s.mk_grade : s.mr_grade];
+            return (
+              <tr key={s.id} className="data-table-row">
+                <td style={{ display: 'flex', alignItems: 'center' }} onClick={()=>onSelect(s.id)}>
+                  <img src={s.img} className="data-table-thumbnail" />
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: '13px' }} className="tracking-tight">{s.name}</div>
+                    <div style={{ fontSize: '10px', color: '#8B949E' }} className="font-medium uppercase tracking-wide">{s.ct}ct &middot; {s.pattern} &middot; {s.brightness}</div>
+                  </div>
+                </td>
+                <td onClick={()=>onSelect(s.id)}>
+                  <div className="flex flex-col gap-0.5">
+                    <Badge label={`M${isK ? s.mk_grade : s.mr_grade}`} color={gColor} />
+                    {s.rarity && (
+                      <span className="text-[7px] font-bold uppercase tracking-tighter opacity-80" style={{ color: s.rarity.color }}>
+                        {s.rarity.label}
+                      </span>
+                    )}
+                  </div>
+                </td>
+                <td style={{ fontFamily: 'monospace' }} onClick={()=>onSelect(s.id)}>
+                  <span style={{color: user.color}}>{formatCur(isK ? s.mk_rough_total : s.mr_offer)}</span>
+                </td>
+                <td onClick={()=>onSelect(s.id)}>
+                  <span className="px-2 py-0.5 rounded-[4px] text-[10px] font-bold" style={{backgroundColor: s.stabilityRisk==='High'?'var(--red-dim)':s.stabilityRisk==='Medium'?'var(--orange-dim)':'var(--teal-dim)', color: s.stabilityRisk==='High'?'var(--red)':s.stabilityRisk==='Medium'?'var(--orange)':'var(--teal)'}}>
+                    {s.stabilityRisk}
+                  </span>
+                </td>
+                <td style={{ textAlign: 'right' }}>
+                  {s.nft ? (
+                    <span className="px-3 py-1.5 rounded text-[11px] font-bold bg-[var(--teal)] text-[var(--bg)] shadow-[0_0_8px_var(--teal-dim)]">◆ Minted</span>
+                  ) : (
+                    <button onClick={(e)=>{e.stopPropagation(); onMint(s);}} className="px-3 py-1 border border-[var(--bdr)] rounded text-[11px] font-bold text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--gold)] transition-all">Mint NFT</button>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  </div>
+);
+
+const DivergenceView = ({ data, onSelect }) => {
+  return (
+    <div className="flex flex-col gap-6 animate-[opn-fadein_0.18s_ease-out]">
+      <div className="bg-[var(--surf2)] border border-[var(--bdr)] p-6 rounded-lg">
+        <h2 className="text-2xl font-light mb-2 font-display tracking-tight">Where Matt K and Matt R Disagree — <span className="opacity-40">and Why It Matters</span></h2>
+        <p className="text-[14px] text-[var(--muted)] border-b border-[var(--bdr)] pb-6 mb-8 font-medium">Each disagreement represents value trapped in the gap between miner knowledge and cutter expertise. AOSA bridges both.</p>
+        
+        <div className="flex">
+          <div className="flex flex-col justify-around pr-6 border-r border-[var(--bdr)] text-[9px] font-bold uppercase tracking-[0.2em] text-[var(--dim)] font-display">
+            <div className="text-[var(--gold)]">Matt K &nbsp; Miner</div>
+            <div className="text-[var(--teal)]">Matt R &nbsp; Cutter</div>
+            <div className="mt-2">Variance Gap</div>
+          </div>
+          <div className="flex-1 overflow-x-auto pl-4 pb-2">
+            <div className="flex gap-1 mb-1">
+              {data.map(s => <div key={'h'+s.id} className="w-14 text-center text-[9px] text-[var(--dim)] truncate">{s.name.split(' ').slice(0,2).join(' ')}</div>)}
+            </div>
+            <div className="flex gap-1 mb-1">
+              {data.map(s => <div key={'mk'+s.id} onClick={()=>onSelect(s.id)} className="w-14 h-11 rounded flex items-center justify-center font-bold text-[13px] cursor-pointer hover:scale-110 transition-transform relative group" style={{backgroundColor: GRADE_COLORS[s.mk_grade]+'55', border: `1px solid ${GRADE_COLORS[s.mk_grade]}BB`, color: GRADE_COLORS[s.mk_grade]}}>
+                M{s.mk_grade}
+              </div>)}
+            </div>
+            <div className="flex gap-1 mb-4">
+              {data.map(s => <div key={'mr'+s.id} onClick={()=>onSelect(s.id)} className="w-14 h-11 rounded flex items-center justify-center font-bold text-[13px] cursor-pointer hover:scale-110 transition-transform" style={{backgroundColor: GRADE_COLORS[s.mr_grade]+'55', border: `1px solid ${GRADE_COLORS[s.mr_grade]}BB`, color: GRADE_COLORS[s.mr_grade]}}>
+                M{s.mr_grade}
+              </div>)}
+            </div>
+            <div className="flex gap-1 border-t border-[var(--bdr)] pt-4">
+              {data.map(s => {
+                const gap = Math.abs(s.mk_grade - s.mr_grade);
+                const color = gap===0?'var(--teal)':gap===1?'#4EA832':gap===2?'#96981E':gap===3?'var(--orange)':'var(--red)';
+                const bg = gap===0?'var(--teal-dim)':gap===1?'rgba(78,168,50,0.18)':gap===2?'rgba(150,152,30,0.18)':gap===3?'var(--orange-dim)':'var(--red-dim)';
+                return <div key={'gap'+s.id} onClick={()=>onSelect(s.id)} className={`w-14 h-8 rounded flex items-center justify-center font-bold text-[11px] cursor-pointer ${gap>=4?'animate-[opn-variance-pulse_2s_infinite]':''}`} style={{backgroundColor: bg, color: color}}>{gap===0?'✓':gap>=4?`±${gap}`:`±${gap}`}</div>
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const NFTCollectionView = ({ data, onSelect, setView }) => {
+  const minted = data.filter(s => s.nft);
+  const unminted = data.filter(s => !s.nft && s.mk_grade >= 3);
+  const genesis = minted.find(s => s.genesis);
+  const others = minted.filter(s => !s.genesis);
+  
+  const ranking = [...minted].sort((a,b) => (b.nft_value || b.mr_offer*1.8 || 0) - (a.nft_value || a.mr_offer*1.8 || 0));
+
+  return (
+    <div className="flex flex-col gap-6 animate-[opn-fadein_0.18s_ease-out]">
+      <div className="flex justify-between items-center bg-[var(--surf2)] p-4 rounded-lg border border-[var(--bdr-hi)] shadow-sm">
+        <div>
+          <h2 className="text-2xl font-light text-[var(--text)] font-display tracking-tight">NFT Collection & <span className="opacity-40">Provenance</span></h2>
+          <p className="text-[12px] text-[var(--muted)] font-medium uppercase tracking-[0.2em] mt-1">Certified on-chain assets</p>
+        </div>
+        <button onClick={() => setView('Mint')} className="px-5 py-2.5 bg-[var(--teal)] hover:brightness-110 text-[#000] font-medium text-[12px] rounded-lg uppercase tracking-[0.15em] transition-all shadow-[0_0_15px_var(--teal-dim)] font-display">
+          Go to The Mint &rarr;
+        </button>
+      </div>
+
+      <div className="flex flex-col lg:flex-row gap-6">
+        <div className="flex-1 flex flex-col gap-6">
+          {genesis && (
+            <div className="bg-[var(--surf2)] border-[2px] border-[var(--gold)] rounded-lg p-1 shadow-[0_0_30px_var(--gold-dim)] overflow-hidden cursor-pointer group" onClick={() => onSelect(genesis.id)}>
+              <div className="relative h-[300px] w-full overflow-hidden rounded bg-[#000]">
+                <div className="absolute inset-0 flex w-full h-full">
+                  <div className="w-1/2 h-full"><img src={genesis.img} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" /></div>
+                  <div className="w-1/2 h-full border-l border-[var(--gold)]"><img src={genesis.nft_img} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" /></div>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg)] via-transparent to-transparent"></div>
+                <div className="absolute top-4 left-4 bg-[var(--bg)] border border-[var(--gold)] px-3 py-1 rounded text-[10px] font-bold text-[var(--gold)] tracking-widest shadow-[0_0_10px_var(--gold-dim)] font-display uppercase">GENESIS NFT</div>
+                
+                <div className="absolute bottom-6 left-6 right-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+                  <div>
+                    <h2 className="text-4xl font-light text-white mb-2 leading-none tracking-tight font-display" style={{textShadow: '0 2px 20px rgba(0,0,0,0.8)'}}>{genesis.name}</h2>
+                    <div className="text-[10px] uppercase tracking-[0.2em] text-[var(--muted)] font-bold mb-1 opacity-80">M9 AOSA Grade &middot; Fully Consensus Verified</div>
+                    <div className="text-[10px] text-[var(--dim)] font-mono opacity-60">ID: OPN-GENESIS-001 &middot; Minted via The Mint &middot; AOSA™</div>
+                  </div>
+                  <div className="text-right bg-[#000000AA] backdrop-blur p-4 rounded border border-[var(--teal)] shadow-[0_0_20px_var(--teal-dim)] w-full md:w-auto">
+                    <div className="text-[10px] uppercase text-[var(--muted)] tracking-wider mb-1 font-display font-bold">On-chain Value</div>
+                    <div className="text-4xl font-light text-[var(--gold)] font-display tracking-tight leading-none">{formatCur(genesis.nft_value || 2160)}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {others.length > 0 && (
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-5">
+              {others.map(s => (
+                <div key={s.id} onClick={() => onSelect(s.id)} className="bg-[var(--surf2)] border border-[var(--bdr)] rounded-lg overflow-hidden cursor-pointer hover:border-[var(--teal)] hover:shadow-[0_0_25px_rgba(16,200,150,0.4)] hover:scale-[1.02] transition-all duration-300 group flex flex-col">
+                  <div className="relative h-[180px]">
+                    <img src={s.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[var(--surf2)] to-transparent"></div>
+                    <div className="absolute top-3 left-3 bg-[#000000AA] backdrop-blur px-2 py-0.5 rounded text-[10px] font-bold text-[var(--teal)] border border-[var(--teal-dim)]">◆ MINTED</div>
+                    <div className="absolute top-3 right-3 text-[10px] font-bold px-2 py-0.5 rounded border border-[#fff4] text-white" style={{backgroundColor: GRADE_COLORS[s.mk_grade]}}>M{s.mk_grade}</div>
+                  </div>
+                  <div className="p-4 flex-1 flex flex-col">
+                    <h3 className="font-medium text-[15px] text-[var(--text)] mb-3 leading-tight font-display tracking-tight">{s.name}</h3>
+                    <div className="mt-auto">
+                      <div className="text-[10px] text-[var(--muted)] uppercase tracking-[0.14em] mb-1 font-display font-bold">NFT Asset Value</div>
+                      <div className="text-[22px] font-light text-[var(--gold)] mb-2 font-display tracking-tight">{formatCur(s.nft_value || s.mr_offer*1.8 || s.listPrice)}</div>
+                      <div className="text-[9px] text-[var(--teal)] bg-[var(--teal-dim)] px-2 py-1 rounded-sm inline-block font-bold tracking-widest uppercase border border-[var(--teal-dim)]">Provenance: +{Math.round(((s.nft_value || s.mr_offer*1.8 || s.listPrice) / (s.mk_rough_total) - 1)*100)}%</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {(unminted.length > 0) && (
+            <div className="mt-4 border-t border-[var(--bdr)] pt-6">
+               <h3 className="text-[13px] font-bold uppercase tracking-widest text-[var(--muted)] mb-4">Available to Mint</h3>
+               <div className="flex flex-col gap-3">
+                 {unminted.map(s => (
+                   <div key={s.id} className="bg-[var(--surf)] border border-[var(--bdr)] rounded-lg p-3 flex flex-col md:flex-row md:items-center gap-4 hover:bg-[var(--surf2)] transition-colors">
+                     <img src={s.img} className="w-12 h-12 rounded object-cover cursor-pointer" onClick={() => onSelect(s.id)} />
+                     <div className="flex-1 cursor-pointer" onClick={() => onSelect(s.id)}>
+                       <div className="font-bold text-[13px]">{s.name}</div>
+                       <div className="text-[11px] text-[var(--muted)]">M{s.mk_grade} &middot; {formatCur(s.mk_rough_total)}</div>
+                     </div>
+                     <button onClick={() => { setView('Mint'); setTimeout(() => window.dispatchEvent(new CustomEvent('nav-mint-stone', {detail: s.id})), 100); }} className="px-4 py-2 border border-[var(--bdr-hi)] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--gold)] font-bold text-[12px] rounded transition-all whitespace-nowrap">
+                       ◉ Open in The Mint &rarr;
+                     </button>
+                   </div>
+                 ))}
+               </div>
+            </div>
+          )}
+        </div>
+
+        <div className="w-full lg:w-[320px] shrink-0 flex flex-col gap-4">
+          <div className="bg-[var(--surf)] border border-[var(--bdr)] rounded-lg overflow-hidden sticky top-6">
+            <div className="p-4 border-b border-[var(--bdr)] bg-[var(--surf2)]">
+              <h3 className="font-bold text-[13px] uppercase tracking-widest text-[var(--gold)] mb-1">NFT Value Ranking</h3>
+              <p className="text-[11px] text-[var(--muted)]">Top certified stones by value</p>
+            </div>
+            <div className="flex flex-col divide-y divide-[var(--bdr)]">
+              {ranking.map((s, idx) => (
+                <div key={s.id} className="p-3 flex items-center justify-between hover:bg-[var(--surf2)] cursor-pointer transition-colors" onClick={() => onSelect(s.id)}>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className={`w-6 h-6 shrink-0 rounded flex items-center justify-center text-[11px] font-bold ${idx === 0 ? 'bg-[var(--gold-dim)] text-[var(--gold)]' : 'bg-[var(--surf3)] text-[var(--muted)]'}`}>
+                       {idx === 0 ? '👑' : idx+1}
+                    </div>
+                    <div className="truncate min-w-0">
+                      <div className="text-[12px] font-bold text-white truncate">{s.name}</div>
+                      <div className="text-[10px] px-1.5 py-0.5 rounded inline-block mt-1 font-bold border border-[#fff2]" style={{backgroundColor: GRADE_COLORS[s.mk_grade], color: '#fff'}}>M{s.mk_grade}</div>
+                    </div>
+                  </div>
+                  <div className="text-[13px] font-mono font-bold text-[var(--gold)] shrink-0 pl-2">
+                    {formatCur(s.nft_value || s.mr_offer*1.8 || s.listPrice)}
+                  </div>
+                </div>
+              ))}
+              {ranking.length === 0 && (
+                <div className="p-6 text-center text-[12px] text-[var(--muted)]">No items minted.</div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const MinerProjectionView = ({ data, onSelect }) => {
+  const top = [...data].sort((a,b) => b.mk_rough_total - a.mk_rough_total).slice(0,5);
+
+  return (
+    <div className="flex flex-col gap-6 animate-[opn-fadein_0.18s_ease-out]">
+      <div className="bg-[var(--surf2)] border border-[var(--bdr)] p-6 rounded-lg relative overflow-hidden">
+        <div className="absolute right-0 top-0 opacity-5 pointer-events-none text-[200px] leading-none transform translate-x-10 -translate-y-10">⚒</div>
+        <h2 className="text-2xl font-light mb-2 font-display tracking-tight">Miner Yield <span className="opacity-40">Projection (Bull Case)</span></h2>
+        <p className="text-[14px] text-[var(--muted)] max-w-3xl leading-relaxed mb-8 font-medium">
+          The miner's valuation relies strictly on untouched raw weight and heuristic surface qualities (brightness, pattern). It expects optimal downstream treatment without assuming the liability of the cutting process itself. This creates the "Volume Paradox" where rough pricing exceeds actual cutter margins.
+        </p>
+
+        <div className="flex flex-col lg:flex-row gap-6">
+          <div className="flex-1 bg-[var(--surf)] border border-[var(--bdr)] rounded p-4 shadow-inner">
+            <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-[var(--dim)] mb-4 font-display">Top 5 Rough Valuations</div>
+            <div className="space-y-3">
+              {top.map((s, i) => (
+                <div key={s.id} onClick={() => onSelect(s.id)} className="flex items-center gap-3 p-2 rounded hover:bg-[var(--surf2)] cursor-pointer transition-colors border border-transparent hover:border-[var(--gold-dim)]">
+                  <div className="w-6 h-6 flex justify-center items-center rounded bg-[var(--surf3)] text-[10px] font-bold text-[var(--gold)] opacity-50">{i+1}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[13px] font-semibold truncate tracking-tight">{s.name}</div>
+                    <div className="text-[10px] text-[var(--muted)] font-medium">{s.wg}g @ {formatCur(s.mk_ppg)}/g &middot; {s.ct}ct</div>
+                  </div>
+                  <div className="text-[15px] font-light text-[var(--gold)] font-display">{formatCur(s.mk_rough_total)}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex-1 bg-[var(--surf)] border border-[var(--bdr)] rounded flex flex-col items-stretch text-center">
+            <KpiStat 
+              label="Total Inventory Rough Valuation" 
+              value={formatCur(data.reduce((acc, s) => acc + s.mk_rough_total, 0))} 
+              color="var(--gold)" 
+            />
+            <div className="p-4 text-[12px] max-w-xs mx-auto text-[var(--dim)] border-t border-[var(--bdr)] font-medium">
+              Represents the complete bull-case scenario if all stones yielded 100% of their raw matrix potential without loss or downgrade.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const CutterYieldView = ({ data, onSelect }) => {
+  const top = [...data].filter(s => s.mr_offer).sort((a,b) => b.mr_offer - a.mr_offer).slice(0,5);
+  
+  return (
+    <div className="flex flex-col gap-6 animate-[opn-fadein_0.18s_ease-out]">
+      <div className="bg-[var(--surf2)] border border-[var(--bdr)] p-6 rounded-lg relative overflow-hidden">
+        <div className="absolute right-0 top-0 opacity-5 pointer-events-none text-[200px] leading-none transform translate-x-10 -translate-y-10">⬡</div>
+        <h2 className="text-2xl font-light mb-2 font-display tracking-tight">Cutter Floor Protocol <span className="opacity-40">(Risk Adjusted)</span></h2>
+        <p className="text-[14px] text-[var(--muted)] max-w-3xl leading-relaxed mb-8 font-medium">
+          The cutter prices in treatment stability, cracking likelihood, disclosure liabilities, and polish loss. The "Treated Concrete Problem" dictates that beautifully colored, but structurally weak matrix is severely discounted down to zero if it cannot survive a commercial setting process.
+        </p>
+
+        <div className="flex flex-col lg:flex-row gap-6">
+          <div className="flex-1 bg-[var(--surf)] border border-[var(--bdr)] rounded p-4 shadow-inner">
+            <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-[var(--dim)] mb-4 font-display">Top 5 Acquisition Offers</div>
+            <div className="space-y-3">
+              {top.map((s, i) => (
+                <div key={s.id} onClick={() => onSelect(s.id)} className="flex items-center gap-3 p-2 rounded hover:bg-[var(--surf2)] cursor-pointer transition-colors border border-transparent hover:border-[var(--teal-dim)]">
+                  <div className="w-6 h-6 flex justify-center items-center rounded bg-[var(--surf3)] text-[10px] font-bold text-[var(--teal)] opacity-50">{i+1}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[13px] font-semibold truncate tracking-tight">{s.name}</div>
+                    <div className="text-[10px] text-[var(--muted)] font-medium">{s.stabilityRisk} Risk &middot; Yield ~40%</div>
+                  </div>
+                  <div className="text-[15px] font-light text-[var(--teal)] font-display">{formatCur(s.mr_offer)}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex-1 bg-[var(--surf)] border border-[var(--bdr)] rounded flex flex-col items-stretch text-center">
+            <KpiStat 
+              label="Total Inventory Offer Book" 
+              value={formatCur(data.reduce((acc, s) => acc + (s.mr_offer || 0), 0))} 
+              color="var(--teal)" 
+            />
+            <div className="p-4 text-[12px] max-w-xs mx-auto text-[var(--dim)] border-t border-[var(--bdr)] font-medium">
+              The aggregate "cash on table" value assuming Matt R acquired the total portfolio at standard lapidary risk metrics.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const BenchmarkDataView = () => {
+  const grades = [
+    { g: "M9", desc: "Top Gem Hard Matrix", tr: "No / Low", st: "Low", pt: "Harlequin/Ribbon", val: "$10 - $15+ / ct" },
+    { g: "M8", desc: "High Grade Hard Matrix", tr: "Low", st: "Low", pt: "Ribbon/Flash", val: "$3.50 - $5 / g" },
+    { g: "M7", desc: "Mid-High Grade Matrix", tr: "Standard", st: "Low", pt: "Flash", val: "$3 / g" },
+    { g: "M6", desc: "Mid Grade Hard Matrix", tr: "Standard", st: "Med", pt: "Flash/Pinfire", val: "$2.50 / g" },
+    { g: "M5", desc: "High Grade Treated", tr: "High", st: "Med", pt: "Flash", val: "$1 - $2 / g" },
+    { g: "M4", desc: "Low Grade Treated (Soft)", tr: "High", st: "High", pt: "Pinfire", val: "$0.70 - $1 / g" },
+    { g: "M3", desc: "Low Grade Colour Present", tr: "Standard", st: "High", pt: "Pinfire/Speckle", val: "$0.30 - $0.50 / g" },
+    { g: "M2", desc: "Solid Matrix Low Quality", tr: "Poor", st: "High", pt: "Speckle", val: "Bulk lot" },
+    { g: "M1", desc: "Commercial Matrix", tr: "Poor", st: "Crit", pt: "None", val: "Untradeable" }
+  ];
+
+  return (
+    <div className="flex flex-col gap-6 animate-[opn-fadein_0.18s_ease-out]">
+      <div className="data-table-container shadow-2xl">
+        <div style={{ padding: '24px', borderBottom: '1px solid rgba(100,120,180,0.12)', background: 'rgba(255,255,255,0.02)' }}>
+          <h2 style={{ fontSize: '24px', fontWeight: 300, marginBottom: '4px', fontFamily: 'var(--font-display)', letterSpacing: '-0.01em' }}>AOSA Master Grading Standard</h2>
+          <p style={{ fontSize: '13px', color: '#8B949E', fontWeight: 500 }}>The definitive matrix for Andamooka Opal valuation, bridging miner heuristics and cutter yields.</p>
+        </div>
+        
+        <div className="overflow-x-auto bg-[#131720]">
+          <table className="w-full text-left whitespace-nowrap">
+            <thead>
+              <tr className="data-table-header-row">
+                <th style={{ width: '80px' }} className="font-display font-medium uppercase tracking-[0.15em] text-[9px] opacity-60">Grade</th>
+                <th className="font-display font-medium uppercase tracking-[0.15em] text-[9px] opacity-60">Classification</th>
+                <th className="font-display font-medium uppercase tracking-[0.15em] text-[9px] opacity-60">Typical Pattern</th>
+                <th className="font-display font-medium uppercase tracking-[0.15em] text-[9px] opacity-60">Treatment Proc.</th>
+                <th className="font-display font-medium uppercase tracking-[0.15em] text-[9px] opacity-60">Stability Profile</th>
+                <th style={{ textAlign: 'right' }} className="font-display font-medium uppercase tracking-[0.15em] text-[9px] opacity-60">Benchmark Valuation</th>
+              </tr>
+            </thead>
+            <tbody>
+              {grades.map(row => (
+                <tr key={row.g} className="data-table-row group">
+                  <td style={{ padding: '16px' }}>
+                    <Badge label={row.g} color={GRADE_COLORS[parseInt(row.g[1])]} />
+                  </td>
+                  <td style={{ padding: '16px', fontWeight: 600, fontSize: '13px' }} className="tracking-tight group-hover:text-white transition-colors">{row.desc}</td>
+                  <td style={{ padding: '16px', color: 'var(--muted)', fontSize: '12px' }}>{row.pt}</td>
+                  <td style={{ padding: '16px', color: 'var(--muted)', fontSize: '12px' }}>{row.tr} Treatment</td>
+                  <td style={{ padding: '16px' }}>
+                    <span className="px-2 py-0.5 rounded-[4px] text-[10px] font-bold uppercase tracking-widest" style={{backgroundColor: row.st==='High'?'var(--red-dim)':row.st==='Med'?'var(--orange-dim)':'var(--teal-dim)', color: row.st==='High'?'var(--red)':row.st==='Med'?'var(--orange)':'var(--teal)'}}>
+                      {row.st}
+                    </span>
+                  </td>
+                  <td style={{ padding: '16px', textAlign: 'right', fontFamily: 'monospace', fontWeight: 600, color: 'var(--gold)', fontSize: '13px' }}>{row.val}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const VerifyAIModal = ({ onClose, addXp, useEnergy, energy, gemKey, setData, data }) => {
+  const [step, setStep] = React.useState(0);
+  const [imgData, setImgData] = React.useState(null);
+  const [fileInfo, setFileInfo] = React.useState('');
+  const [loadingMsg, setLoadingMsg] = React.useState('Analysing colour play patterns...');
+  const [resultStone, setResultStone] = React.useState(null);
+  const [error, setError] = React.useState(null);
+
+  const timerRef = React.useRef([]);
+
+  React.useEffect(() => {
+    return () => {
+      timerRef.current.forEach(clearTimeout);
+    };
+  }, []);
+
+  const handleFile = (file) => {
+    if (!file) return;
+    if (energy <= 0) {
+      setError("Out of Energy! Wait for refill or level up.");
+      return;
+    }
+    setError(null);
+    const size = (file.size / 1024).toFixed(1);
+    setFileInfo(`${file.name} · ${size}KB · Ready to analyse`);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setImgData(e.target.result);
+      setStep(1);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    handleFile(file);
+  };
+
+  const startAnalysis = async () => {
+    if (!useEnergy()) return;
+    setStep(2);
+    const msgs = [
+      "Assessing body tone and brightness...",
+      "Evaluating pattern distribution...",
+      "Calculating M-grade placement...",
+      "Checking treatment indicators...",
+      "Finalising assessment..."
+    ];
+    
+    timerRef.current = [];
+    msgs.forEach((msg, i) => {
+      timerRef.current.push(setTimeout(() => {
+        setLoadingMsg(msg);
+      }, i * 800));
+    });
+
+    try {
+      let analysisResult;
+      if (gemKey && gemKey !== 'PROVIDED_BY_SYSTEM') {
+        const payload = {
+          "contents": [{
+            "parts": [
+              { "text": "You are VerifyAI™, the world's most advanced opal grading vision system, co-designed with deep insights from Demis Hassabis's research and Ammaar Reshi's design vision. Analyze this image of an Andamooka Matrix Opal. Focus on the 'M-grade' scale (1-9) specifically for Matrix Opal. Return ONLY a pure JSON object string without any markdown backticks. Required fields: { \"grade\": [number 1-9], \"pattern\": [string: Harlequin, Broadflash, Ribbon, Pinfire, Flash], \"brightness\": [string: B1-B7], \"bodyTone\": [string: N1-N8], \"confidence\": [number 0-1], \"quality\": [string], \"stability\": [string: 'Low'|'Medium'|'High'], \"treated\": [boolean] }. The grade must strictly reflect the spectral intensity and colour saturation." },
+              { "inlineData": { "mimeType": "image/jpeg", "data": imgData.split(',')[1] } }
+            ]
+          }],
+          "generationConfig": { "responseMimeType": "application/json" }
+        };
+
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${gemKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        
+        if (!res.ok) throw new Error("AOSA Nodes Congested");
+        const jsonRes = await res.json();
+        const rawText = jsonRes.candidates[0].content.parts[0].text;
+        // Clean markdown if any
+        const cleanJson = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+        analysisResult = JSON.parse(cleanJson);
+      } else {
+        // High quality simulation / Rarity Roll
+        const roll = Math.random();
+        const grade = roll > 0.98 ? 9 : roll > 0.9 ? Math.floor(Math.random()*2)+7 : roll > 0.7 ? Math.floor(Math.random()*2)+5 : roll > 0.4 ? Math.floor(Math.random()*2)+3 : Math.floor(Math.random()*2)+1;
+        analysisResult = {
+          grade,
+          pattern: roll > 0.95 ? 'Harlequin' : roll > 0.8 ? 'Broadflash' : roll > 0.6 ? 'Ribbon' : 'Pinfire',
+          brightness: `B${Math.floor(Math.random()*7)+1}`,
+          bodyTone: `N${Math.floor(Math.random()*8)+1}`,
+          confidence: 0.85 + (Math.random() * 0.1),
+          quality: getRarity(grade).label,
+          stability: Math.random() > 0.7 ? 'Medium' : 'Low',
+          treated: true
+        };
+      }
+
+      const id = Date.now();
+      const newStone = calculateDerived({
+        id,
+        name: `${analysisResult.quality} ${analysisResult.pattern} Discovery`,
+        mk_ppg: 1.5,
+        mk_rough_total: (analysisResult.grade * 150) * (1 + Math.random()),
+        mk_grade: analysisResult.grade,
+        mr_offer: null,
+        mr_grade: null,
+        wg: 10 + (Math.random() * 40),
+        ct: 50 + (Math.random() * 200),
+        brightness: analysisResult.brightness,
+        bodyTone: analysisResult.bodyTone,
+        pattern: analysisResult.pattern,
+        treatmentQuality: analysisResult.treated ? 'Standard' : 'Untreated',
+        stabilityRisk: analysisResult.stability,
+        img: imgData,
+        discovered: true
+      });
+
+      setResultStone({ ...newStone, analysis: analysisResult });
+      addXp(newStone.rarity.xp);
+      setData(prev => [newStone, ...prev]);
+
+      timerRef.current.push(setTimeout(() => {
+        setStep(3);
+      }, 4500));
+
+    } catch (err) {
+      console.error(err);
+      setError("Discovery Failed. Network divergence detected.");
+      setStep(1);
+    }
+  };
+
+  const cancelAndClose = () => {
+    timerRef.current.forEach(clearTimeout);
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 animate-[opn-fadein_0.2s_ease-out]" style={{ background: 'rgba(7,10,18,0.96)', backdropFilter: 'blur(20px)' }}>
+      <div className="bg-[var(--surf)] border border-[var(--bdr-hi)] md:rounded-2xl w-full h-full md:h-auto max-w-[520px] flex flex-col overflow-hidden shadow-2xl relative">
+        <div style={{ background: 'linear-gradient(135deg, rgba(16,200,150,0.15) 0%, transparent 100%)', borderBottom: '1px solid rgba(16,200,150,0.2)' }} className="px-6 py-4 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-3">
+            <svg className="w-5 h-5 text-[#10C896]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
+            <span className="text-[#10C896] font-medium tracking-widest uppercase text-[11px] font-display">AOSA VerifyAI™</span>
+          </div>
+          <div className="flex gap-4 items-center">
+            {step === 1 && <button onClick={() => setStep(0)} className="text-[12px] text-[var(--muted)] hover:text-white font-bold tracking-wider uppercase">← Back</button>}
+            <button onClick={cancelAndClose} className="text-[var(--muted)] hover:text-white text-3xl leading-none">&times;</button>
+          </div>
+        </div>
+        
+        {step === 0 && (
+          <div className="p-8 flex flex-col items-center h-full justify-center">
+            <div className="h-8 mb-6"><AOSA_Logo_Scaled /></div>
+            <p className="text-[13px] text-[var(--muted)] mb-4 text-center">Instant visual grading for Andamooka Matrix Opal</p>
+
+            {error && (
+              <div className="w-full p-3 mb-6 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-[11px] font-bold text-center animate-shake">
+                {error}
+              </div>
+            )}
+
+            <div className="flex md:flex-row flex-col gap-4 w-full mb-6">
+              <label className="flex-1 border-2 border-[var(--gold-dim)] bg-[var(--surf2)] rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer hover:bg-[var(--surf3)] hover:border-[var(--gold)] transition-colors relative">
+                <input type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => handleFile(e.target.files[0])} />
+                <svg className="w-8 h-8 text-[var(--gold)] mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <div className="text-[15px] font-bold text-white mb-1">Take Photo</div>
+                <div className="text-[11px] text-[var(--muted)]">Use your camera</div>
+              </label>
+              <label className="flex-1 border-2 border-[var(--teal-dim)] bg-[var(--surf2)] rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer hover:bg-[var(--surf3)] hover:border-[var(--teal)] transition-colors">
+                <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFile(e.target.files[0])} />
+                <svg className="w-8 h-8 text-[var(--teal)] mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                <div className="text-[15px] font-bold text-white mb-1">Upload Photo</div>
+                <div className="text-[11px] text-[var(--muted)]">From your device</div>
+              </label>
+            </div>
+
+            <div className="flex items-center gap-3 mb-8 bg-black/20 px-6 py-3 rounded-full border border-white/5">
+               <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--muted)]">Available Energy</div>
+               <div className="flex gap-1">
+                 {[...Array(10)].map((_, i) => (
+                   <div key={i} className={`w-1.5 h-3 rounded-sm ${i < energy ? 'bg-[var(--teal)] shadow-[0_0_5px_var(--teal)]' : 'bg-white/5'}`}></div>
+                 ))}
+               </div>
+            </div>
+            
+            <div className="text-[10px] text-[var(--dim)] text-center w-full max-w-sm">
+              VerifyAI provides a preliminary visual assessment only. It is not a substitute for formal AOSA certification. Results are indicative and for guidance purposes only.
+            </div>
+          </div>
+        )}
+
+        {step === 1 && (
+          <div className="flex flex-col h-full">
+            <div className="p-6 flex flex-col gap-6 flex-1 overflow-y-auto">
+              {error && (
+                <div className="w-full p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-[11px] font-bold text-center">
+                  {error}
+                </div>
+              )}
+              <div className="w-full h-[240px] bg-[var(--bg)] rounded-lg border border-[var(--gold-dim)] overflow-hidden flex items-center justify-center shrink-0 shadow-inner">
+                <img src={imgData} className="max-w-full max-h-full object-contain" />
+              </div>
+              <div className="text-[11px] text-[var(--muted)] text-center">{fileInfo}</div>
+              
+              <div className="bg-[var(--surf3)] border border-[var(--bdr)] p-5 rounded-xl space-y-4">
+                <p className="text-[11px] text-[var(--muted)] leading-relaxed italic">"Optical spectroscopy suggests unique diffraction patterns. AI divergence may occur. Proceed with capture?"</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full bg-[var(--teal)] animate-pulse"></div>
+                  <span className="text-[10px] font-bold text-[var(--teal)] uppercase tracking-widest">Protocol Sync Nominal</span>
+                </div>
+              </div>
+
+              <button onClick={startAnalysis} className="mt-auto md:mt-0 w-full py-4 rounded-xl text-white text-[15px] font-bold tracking-widest uppercase transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-[var(--gold-dim)] font-display" style={{background: 'linear-gradient(135deg, var(--gold), var(--teal))'}}>
+                Capturing &mdash; 1 Energy
+              </button>
+            </div>
+          </div>
+        )}
+
+        {step === 2 && (
+          <div className="p-12 flex flex-col items-center justify-center h-full md:h-[420px]">
+            <div className="relative w-[200px] h-[200px] bg-[var(--bg)] rounded-2xl border-2 border-[var(--teal)] overflow-hidden mb-8 shadow-[0_0_50px_var(--teal-dim)]">
+              <img src={imgData} className="w-full h-full object-cover opacity-60" />
+              <div className="absolute inset-x-0 h-1/2 bg-[var(--teal)] opacity-5 transition-all duration-300" style={{ top: loadingMsg.length % 2 === 0 ? '0%' : '50%' }}></div>
+              <div className="absolute left-0 right-0 h-1 bg-[var(--teal)] shadow-[0_0_20px_var(--teal)] opacity-80" style={{animation: 'opn-scan 1.5s linear infinite'}} />
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="text-[64px] opacity-10 font-display">⬡</div>
+              </div>
+            </div>
+            
+            <div className="flex flex-col items-center gap-3">
+              <div className="flex gap-1 mb-2">
+                {[...Array(5)].map((_, i) => (
+                   <div key={i} className="w-1.5 h-1.5 rounded-full bg-[var(--teal)] animate-bounce" style={{ animationDelay: `${i * 0.1}s` }}></div>
+                ))}
+              </div>
+              <div className="font-bold text-[14px] text-[var(--teal)] uppercase tracking-widest animate-pulse font-display">{loadingMsg}</div>
+              <div className="text-[10px] text-[var(--dim)] font-mono">NEURAL NETWORK ACTIVE</div>
+            </div>
+          </div>
+        )}
+
+        {step === 3 && resultStone && (
+          <div className="p-8 flex flex-col h-full animate-[opn-fadein_0.5s_ease-out] relative">
+            <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
+              <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-transparent via-white/5 to-transparent skew-x-[-20deg] animate-[opn-shine_2s_infinite]"></div>
+            </div>
+            
+            <style dangerouslySetInnerHTML={{__html: `
+              @keyframes opn-shine {
+                0% { transform: translateX(-100%) skewX(-20deg); }
+                100% { transform: translateX(200%) skewX(-20deg); }
+              }
+            `}} />
+
+            <h3 className="text-[10px] font-bold tracking-[0.3em] uppercase text-[var(--teal)] mb-6 text-center font-display">Discovery Logged</h3>
+            
+            <div className="flex flex-col gap-6 w-full mb-8 items-center bg-black/20 p-6 rounded-2xl border border-white/5 shadow-inner">
+              <div className="relative">
+                <div className="absolute -inset-4 bg-[var(--gold-dim)] rounded-full blur-2xl animate-pulse"></div>
+                <div className="w-[140px] h-[140px] rounded-2xl shrink-0 overflow-hidden border-2 border-[var(--gold-dim)] shadow-2xl relative z-10 rotate-3">
+                  <img src={imgData} className="w-full h-full object-cover" />
+                </div>
+                <div className="absolute -top-3 -right-3 px-3 py-1 rounded bg-[var(--gold)] text-black text-[10px] font-bold z-20 font-display shadow-lg shadow-[var(--gold-dim)]">NEW</div>
+              </div>
+              
+              <div className="flex-1 flex flex-col justify-center items-center text-center relative z-10">
+                <div className="text-[64px] font-light leading-none mb-2 font-display tracking-tighter" style={{ color: resultStone.rarity.color, textShadow: `0 0 30px ${resultStone.rarity.color}66` }}>M{resultStone.mk_grade}</div>
+                <div className="text-[16px] font-bold mb-1 font-display uppercase tracking-widest" style={{ color: resultStone.rarity.color }}>{resultStone.rarity.label} Grade</div>
+                <div className="text-[11px] text-[var(--muted)] font-bold uppercase tracking-widest mb-4">{resultStone.analysis.pattern} &middot; {resultStone.analysis.stability} Risk</div>
+                
+                <div className="flex items-center gap-2 bg-black/40 px-4 py-2 rounded-full border border-white/5">
+                   <div className="text-[10px] font-bold text-[var(--teal)] font-mono">+{resultStone.rarity.xp} XP</div>
+                   <div className="w-1 h-1 rounded-full bg-[var(--dim)]"></div>
+                   <div className="text-[10px] font-bold text-[var(--gold)] font-mono">{formatCur(resultStone.mk_rough_total)}</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="w-full rounded-xl bg-[var(--surf2)] border border-[var(--bdr)] overflow-hidden mb-10 shadow-xl">
+               <div className="grid grid-cols-2 divide-[var(--bdr)] border-b border-[var(--bdr)]">
+                 <div className="p-4 border-r border-[var(--bdr)]">
+                   <div className="text-[9px] uppercase tracking-wider text-[var(--muted)] mb-1 font-bold">AOSA Metrics</div>
+                   <div className="font-bold text-[14px] text-white font-display uppercase tracking-tight">{resultStone.analysis.brightness} / {resultStone.analysis.bodyTone}</div>
+                 </div>
+                 <div className="p-4">
+                   <div className="text-[9px] uppercase tracking-wider text-[var(--muted)] mb-1 font-bold">AI Confidence</div>
+                   <div className="font-bold font-mono text-[14px] text-[var(--teal)]">{(resultStone.analysis.confidence * 100).toFixed(1)}%</div>
+                 </div>
+               </div>
+               <div className="p-4 text-center bg-black/10">
+                  <div className="text-[9px] uppercase tracking-[0.15em] text-[var(--dim)] font-bold mb-1">PROVENANCE STATUS</div>
+                  <div className="text-[11px] font-bold text-[var(--muted)] flex items-center justify-center gap-2">
+                     <span className="w-1.5 h-1.5 rounded-full bg-[var(--teal)]"></span>
+                     LOCALLY ENCRYPTED & SAVED TO INVENTORY
+                  </div>
+               </div>
+            </div>
+
+            <div className="flex gap-2 items-center justify-center mb-6">
+                <div className="px-2 py-1 rounded bg-[var(--gold-dim)] text-[var(--gold)] text-[8px] font-bold uppercase tracking-widest border border-[var(--gold-dim)] font-display">Teachable Machine v2</div>
+                <div className="px-2 py-1 rounded bg-[var(--teal-dim)] text-[var(--teal)] text-[8px] font-bold uppercase tracking-widest border border-[var(--teal-dim)] font-display">Vision Grounded</div>
+            </div>
+
+            <button onClick={onClose} className="mt-auto w-full py-4 rounded-xl text-[12px] font-bold bg-[var(--surf3)] hover:bg-[var(--surf2)] text-white border border-[var(--bdr-hi)] transition-all uppercase tracking-widest font-display shadow-lg hover:scale-[1.02]">
+              Close & Update Dashboard
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const VerifyAIFAB = ({ onClick, energy }) => {
+  return (
+    <button 
+      onClick={onClick}
+      style={{
+        position: 'fixed',
+        bottom: '24px',
+        right: '24px',
+        borderRadius: '30px',
+        padding: '10px 20px',
+        background: 'rgba(16,200,150,0.15)',
+        border: '1px solid rgba(16,200,150,0.4)',
+        color: '#10C896',
+        backdropFilter: 'blur(10px)',
+        boxShadow: `0 4px 20px rgba(0,0,0,0.4), 0 0 ${energy > 0 ? '10px' : '0'} rgba(16,200,150,0.2)`,
+        zIndex: 9990,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '8px',
+        transition: 'all 150ms'
+      }}
+      className={`hover:scale-105 group ${energy <= 0 ? 'opacity-50 grayscale' : ''}`}
+      title={energy > 0 ? "AOSA VerifyAI — Instant opal grading" : "Out of Energy — wait for recharge"}
+    >
+      <div className="relative">
+        <svg className="w-5 h-5 shrink-0 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+        {energy > 0 && <div className="absolute -top-1 -right-0.5 w-2 h-2 bg-[var(--teal)] rounded-full animate-pulse shadow-[0_0_5px_var(--teal)]"></div>}
+      </div>
+      <span className="text-[11px] font-bold tracking-[0.14em] uppercase hidden md:block relative z-10 pr-2 font-display">VerifyAI™</span>
+      <div className="px-1.5 py-0.5 rounded bg-[#10C896] text-black text-[9px] font-bold font-mono">{energy}</div>
+    </button>
+  );
+};
+
+const MarketplaceView = ({ data, user, onSelect }) => {
+  const [viewMode, setViewMode] = React.useState('grid');
+  const [gradeFilter, setGradeFilter] = React.useState('all');
+  const [buyModal, setBuyModal] = React.useState(null);
+  const [offerModal, setOfferModal] = React.useState(null);
+  const [purchased, setPurchased] = React.useState([]);
+
+  const getListingPrice = (s) => {
+    const base = s.mr_offer || s.mk_rough_total;
+    if (s.mk_grade >= 9) return base * 1.5;
+    if (s.mk_grade >= 8) return base * 1.8;
+    if (s.mk_grade >= 7) return base * 2.0;
+    if (s.mk_grade >= 6) return base * 2.2;
+    if (s.mk_grade >= 5) return base * 2.5;
+    return base * 3.0; // fallback but shouldn't hit due to filter
+  };
+
+  const eligibleStones = data.filter(s => s.mk_grade >= 5).map(s => ({
+    ...s,
+    listPrice: s.id === 13 ? 4500 : getListingPrice(s),
+    isPurchased: purchased.includes(s.id)
+  }));
+
+  const filtered = eligibleStones.filter(s => {
+    if (gradeFilter === 'm7+') return s.mk_grade >= 7;
+    if (gradeFilter === 'm9') return s.mk_grade >= 9;
+    return true;
+  });
+
+  const totalCap = eligibleStones.reduce((sum, s) => sum + s.listPrice, 0);
+  const floorPrice = Math.min(...eligibleStones.map(s => s.listPrice));
+  const featured = eligibleStones.find(s => s.id === 13);
+
+  const handleBuy = (stone) => {
+    setBuyModal(stone);
+  };
+
+  const confirmBuy = () => {
+    if(!buyModal) return;
+    setPurchased([...purchased, buyModal.id]);
+    setBuyModal(null);
+  };
+
+  const handleOffer = (stone) => {
+    setOfferModal(stone);
+  };
+
+  const confirmOffer = () => {
+    setOfferModal(null);
+  };
+
+  return (
+    <div className="flex flex-col gap-6 animate-[opn-fadein_0.18s_ease-out]">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h2 className="text-3xl font-light text-[var(--text)] mb-1 font-display tracking-tight">OPN <span className="opacity-40 font-display">Marketplace</span></h2>
+          <p className="text-[13px] text-[var(--muted)] font-medium uppercase tracking-[0.2em] mt-1">Certified Andamooka Matrix &middot; Verified Provenance</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="flex bg-[var(--surf2)] rounded border border-[var(--bdr)] overflow-hidden">
+            <button onClick={() => setViewMode('grid')} className={`px-4 py-1.5 text-[11px] font-bold transition-colors ${viewMode === 'grid' ? 'bg-[var(--surf3)] text-[var(--text)]' : 'text-[var(--muted)] hover:bg-[var(--surf3)]'}`}>Grid View</button>
+            <button onClick={() => setViewMode('list')} className={`px-4 py-1.5 text-[11px] font-bold transition-colors ${viewMode === 'list' ? 'bg-[var(--surf3)] text-[var(--text)]' : 'text-[var(--muted)] hover:bg-[var(--surf3)]'}`}>List View</button>
+          </div>
+          <div className="flex bg-[var(--surf2)] rounded border border-[var(--bdr)] overflow-hidden">
+            <button onClick={() => setGradeFilter('all')} className={`px-3 py-1.5 text-[11px] font-bold transition-colors ${gradeFilter === 'all' ? 'bg-[var(--surf3)] text-[var(--text)]' : 'text-[var(--muted)] hover:bg-[var(--surf3)]'}`}>All Grades</button>
+            <button onClick={() => setGradeFilter('m7+')} className={`px-3 py-1.5 text-[11px] font-bold transition-colors ${gradeFilter === 'm7+' ? 'bg-[var(--surf3)] text-[var(--text)]' : 'text-[var(--muted)] hover:bg-[var(--surf3)]'}`}>M7+</button>
+            <button onClick={() => setGradeFilter('m9')} className={`px-3 py-1.5 text-[11px] font-bold transition-colors ${gradeFilter === 'm9' ? 'bg-[var(--surf3)] text-[var(--text)]' : 'text-[var(--muted)] hover:bg-[var(--surf3)]'}`}>M9</button>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', padding: '20px 24px 0' }}>
+        <KpiStat label="LISTED STONES" value={eligibleStones.length} color="var(--text)" />
+        <KpiStat label="TOTAL MARKET CAP" value={formatCur(totalCap)} color="var(--gold)" />
+        <KpiStat label="FLOOR PRICE" value={formatCur(floorPrice)} color="var(--teal)" />
+        <KpiStat label="VOLUME (24H)" value="$0" sub="Market opens soon" color="var(--muted)" />
+      </div>
+
+      {featured && (
+        <div className="bg-[var(--surf2)] border border-[var(--gold)] rounded-xl overflow-hidden shadow-[0_0_30px_var(--gold-dim)] flex flex-col md:flex-row">
+          <div className="w-full md:w-1/2 h-[300px] flex">
+            <div className="w-1/2 h-full"><img src={featured.img} className="w-full h-full object-cover" /></div>
+            <div className="w-1/2 h-full"><img src={featured.nft ? featured.nft_img : featured.img} className="w-full h-full object-cover" /></div>
+          </div>
+          <div className="w-full md:w-1/2 p-8 flex flex-col justify-center">
+            <div className="flex gap-2 mb-4">
+              <span className="px-2 py-1 rounded-sm bg-[var(--gold-dim)] text-[var(--gold)] text-[10px] uppercase font-bold tracking-[0.2em] border border-[var(--gold)] shadow-[0_0_10px_var(--gold-dim)] font-display">◆ Genesis Listing</span>
+              <span className="px-2 py-1 rounded-sm bg-[var(--teal-dim)] text-[var(--teal)] text-[10px] uppercase font-bold tracking-[0.2em] border border-[var(--teal)] font-display">M9 &middot; Harlequin Grade</span>
+            </div>
+            <h3 className="text-4xl font-light text-[var(--text)] mb-6 font-display tracking-tight leading-none">{featured.name}</h3>
+            
+            <div className="flex items-end justify-between mb-8">
+              <div>
+                <div className="text-[11px] uppercase tracking-[0.25em] text-[var(--muted)] mb-2 font-bold font-display">Listing Price</div>
+                <div className="text-5xl text-[var(--gold)] font-light leading-none tracking-tighter font-display">{formatCur(featured.listPrice)} <span className="text-xl text-[var(--muted)] font-display uppercase tracking-widest font-bold ml-1">AUD</span></div>
+              </div>
+              <div className="flex flex-col items-end">
+                <span className="text-[11px] text-[var(--teal)] font-bold mb-1">◆ NFT Certificate Included</span>
+                <span className="text-[11px] text-[var(--muted)]">Both graders confirm M9 &middot; Polygon verified</span>
+              </div>
+            </div>
+
+            <div className="flex gap-4 mb-6">
+              <button disabled={featured.isPurchased} onClick={() => handleBuy(featured)} className="flex-1 bg-[var(--gold)] hover:brightness-110 text-[#000] font-bold py-3 rounded-lg text-[14px] transition-all disabled:opacity-50 min-w-0 truncate">{featured.isPurchased ? 'Owned' : `Buy Now — ${formatCur(featured.listPrice)}`}</button>
+              <button disabled={featured.isPurchased} onClick={() => handleOffer(featured)} className="flex-1 border border-[var(--gold)] text-[var(--gold)] hover:bg-[var(--gold-dim)] font-bold py-3 rounded-lg text-[14px] transition-all disabled:opacity-50">Make Offer</button>
+            </div>
+
+            <div className="flex items-center gap-2 text-[10px] font-bold text-[var(--muted)] overflow-x-auto whitespace-nowrap">
+              <span>Extracted</span><span className="w-1.5 h-1.5 rounded-full bg-[var(--teal)]"></span>
+              <span>Miner Cert</span><span className="w-1.5 h-1.5 rounded-full bg-[var(--teal)]"></span>
+              <span>Cutter Verified</span><span className="w-1.5 h-1.5 rounded-full bg-[var(--teal)]"></span>
+              <span>NFT Minted</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {viewMode === 'grid' ? (
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          {filtered.filter(s => s.id !== 13).map(s => (
+             <div key={s.id} className="bg-[var(--surf)] border border-[var(--bdr)] rounded-xl overflow-hidden hover:border-[var(--bdr-hi)] transition-colors flex flex-col">
+               <div className="relative h-[180px] bg-[#000] cursor-pointer" onClick={() => onSelect(s.id)}>
+                 <img src={s.img} className="w-full h-full object-cover" />
+                 <div className="absolute top-2 right-2 border border-[#fff3] px-2 py-0.5 rounded text-[11px] font-bold backdrop-blur" style={{backgroundColor: GRADE_COLORS[s.mk_grade]+'dd', color: '#fff'}}>{s.mk_grade >= 7 ? 'M'+s.mk_grade : `M${s.mk_grade}`}</div>
+                 {s.nft && <div className="absolute top-2 left-2 bg-[var(--teal)] text-[#000] px-2 py-0.5 rounded text-[10px] font-bold border border-black">&diams; NFT</div>}
+               </div>
+               <div className="p-4 flex flex-col flex-1 cursor-pointer" onClick={() => onSelect(s.id)}>
+                 <div className="font-bold text-[13px] text-white leading-tight mb-1 truncate">{s.name}</div>
+                 <div className="text-[11px] text-[var(--muted)] mb-3">{s.wg}g &middot; {s.ct}ct &middot; M{s.mk_grade} {s.pattern}</div>
+                 
+                 <div className="mt-auto mb-4">
+                   <div className="text-[10px] uppercase font-bold tracking-widest text-[var(--muted)] mb-0.5">Listing Price</div>
+                   <div className="text-[20px] font-mono font-bold text-[var(--gold)]">{formatCur(s.listPrice)}</div>
+                 </div>
+
+                 <div className="grid grid-cols-2 gap-2 text-[10px] font-mono text-[var(--muted)] mb-4 pt-3 border-t border-[var(--bdr)]">
+                   <div>MK: {formatCur(s.mk_rough_total)}</div>
+                   <div className="text-right">MR: {s.mr_offer ? formatCur(s.mr_offer) : 'N/A'}</div>
+                 </div>
+               </div>
+               <div className="px-4 pb-4 flex gap-2">
+                 <button disabled={s.isPurchased} onClick={() => handleBuy(s)} className="flex-1 bg-[var(--gold)] hover:brightness-110 text-[#000] font-bold py-2 rounded text-[12px] transition-all disabled:opacity-50">Buy</button>
+                 <button disabled={s.isPurchased} onClick={() => handleOffer(s)} className="flex-1 border border-[var(--gold)] text-[var(--gold)] hover:bg-[var(--gold-dim)] font-bold py-2 rounded text-[12px] transition-all disabled:opacity-50">Offer</button>
+               </div>
+             </div>
+          ))}
+        </div>
+      ) : (
+        <div className="data-table-container">
+          <div className="overflow-x-auto bg-[#131720]">
+            <table className="w-full text-left whitespace-nowrap">
+              <thead>
+                 <tr className="data-table-header-row">
+                   <th style={{ width: '280px' }}>Asset</th>
+                   <th style={{ textAlign: 'center' }}>Grade</th>
+                   <th style={{ textAlign: 'right' }}>M.K (Rough)</th>
+                   <th style={{ textAlign: 'right' }}>M.R (Offer)</th>
+                   <th style={{ textAlign: 'right', color: 'var(--gold)' }}>Listing Price</th>
+                   <th style={{ textAlign: 'right' }}>Action</th>
+                 </tr>
+              </thead>
+              <tbody>
+                 {filtered.map(s => (
+                   <tr key={s.id} className="data-table-row">
+                     <td style={{ display: 'flex', alignItems: 'center' }} onClick={() => onSelect(s.id)}>
+                       <img src={s.img} className="data-table-thumbnail" />
+                       <div>
+                         <div style={{ fontWeight: 600 }}>{s.name}</div>
+                         <div style={{ fontSize: '10px', color: '#8B949E' }}>{s.ct}ct &middot; {s.pattern}</div>
+                       </div>
+                     </td>
+                     <td style={{ textAlign: 'center' }} onClick={() => onSelect(s.id)}><Badge label={`M${s.mk_grade}`} color={GRADE_COLORS[s.mk_grade]} /></td>
+                     <td style={{ textAlign: 'right', fontFamily: 'monospace' }} onClick={() => onSelect(s.id)}>{formatCur(s.mk_rough_total)}</td>
+                     <td style={{ textAlign: 'right', fontFamily: 'monospace' }} onClick={() => onSelect(s.id)}>{s.mr_offer ? formatCur(s.mr_offer) : <span className="text-[var(--dim)]">N/A</span>}</td>
+                     <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: 'var(--gold)' }} onClick={() => onSelect(s.id)}>{formatCur(s.listPrice)}</td>
+                     <td style={{ textAlign: 'right' }}>
+                       {s.isPurchased ? (
+                         <span className="text-[10px] uppercase font-bold text-[var(--teal)]">Owned</span>
+                       ) : (
+                         <div className="flex justify-end gap-2">
+                           <button onClick={(e) => { e.stopPropagation(); handleBuy(s); }} className="bg-[var(--gold)] text-black px-3 py-1 rounded text-[11px] font-bold transition-all hover:brightness-110">Buy</button>
+                           <button onClick={(e) => { e.stopPropagation(); handleOffer(s); }} className="border border-[var(--gold)] text-[var(--gold)] px-3 py-1 rounded text-[11px] font-bold transition-all hover:bg-[var(--gold-dim)]">Offer</button>
+                         </div>
+                       )}
+                     </td>
+                   </tr>
+                 ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {buyModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-[var(--surf)] border border-[var(--bdr-hi)] rounded-xl w-full max-w-sm p-8 shadow-2xl flex flex-col">
+            <h3 className="text-2xl font-light text-white mb-6 font-display tracking-tight">Confirm Purchase</h3>
+            <div className="flex gap-4 mb-8 bg-black/20 p-3 rounded-lg border border-[var(--bdr)]">
+              <img src={buyModal.img} className="w-16 h-16 rounded object-cover shadow-lg" />
+              <div>
+                <div className="font-medium text-[15px] leading-tight mb-2 font-display tracking-tight">{buyModal.name}</div>
+                <Badge label={`M${buyModal.mk_grade}`} color={GRADE_COLORS[buyModal.mk_grade]} />
+              </div>
+            </div>
+            
+            <div className="bg-[var(--surf2)] rounded-lg p-4 font-mono text-[12px] mb-6">
+              <div className="flex justify-between mb-2 text-[var(--muted)]"><span>Stone Price</span><span>{formatCur(buyModal.listPrice)}</span></div>
+              <div className="flex justify-between mb-4 text-[var(--muted)]"><span>Platform Fee (2.5%)</span><span>{formatCur(buyModal.listPrice * 0.025)}</span></div>
+              <div className="flex justify-between font-bold text-[16px] text-[var(--gold)] pt-4 border-t border-[var(--bdr)]"><span>Total</span><span>{formatCur(buyModal.listPrice * 1.025)}</span></div>
+            </div>
+
+            <div className="flex gap-3">
+              <button onClick={() => setBuyModal(null)} className="flex-1 py-2 rounded border border-[var(--bdr)] hover:bg-[var(--surf2)] font-bold text-[13px] text-[var(--muted)] transition-colors">Cancel</button>
+              <button onClick={confirmBuy} className="flex-1 py-2 rounded bg-[var(--gold)] hover:brightness-110 text-[#000] font-bold text-[13px] transition-all">Confirm Purchase</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {offerModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-[var(--surf)] border border-[var(--bdr-hi)] rounded-xl w-full max-w-sm p-8 shadow-2xl flex flex-col">
+            <h3 className="text-2xl font-light text-white mb-6 font-display tracking-tight">Make an <span className="opacity-40">Offer</span></h3>
+            <div className="flex gap-4 mb-6 bg-black/20 p-3 rounded-lg border border-[var(--bdr)]">
+              <img src={offerModal.img} className="w-16 h-16 rounded object-cover shadow-lg" />
+              <div>
+                <div className="font-medium text-[15px] leading-tight mb-1 font-display tracking-tight">{offerModal.name}</div>
+                <div className="text-[11px] text-[var(--muted)] font-medium uppercase tracking-widest mt-1">List price: {formatCur(offerModal.listPrice)}</div>
+              </div>
+            </div>
+            
+            <label className="text-[11px] font-bold uppercase tracking-widest text-[var(--muted)] mb-2 mt-4 block">Your Offer (AUD)</label>
+            <input type="number" defaultValue={(offerModal.mr_offer || (offerModal.mk_rough_total * 1.2)).toFixed(2)} className="w-full bg-[var(--bg)] border border-[var(--bdr)] p-3 rounded font-mono text-lg text-[var(--gold)] outline-none focus:border-[var(--gold)] mb-6" />
+
+             <div className="flex gap-3">
+              <button onClick={() => setOfferModal(null)} className="flex-1 py-2 rounded border border-[var(--bdr)] hover:bg-[var(--surf2)] font-bold text-[13px] text-[var(--muted)] transition-colors">Cancel</button>
+              <button onClick={confirmOffer} className="flex-1 py-2 rounded bg-[var(--teal)] hover:brightness-110 text-[#000] font-bold text-[13px] transition-all">Submit Offer</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const TheMintView = ({ data, setData, custodianData, setCustodianData, addXp, gemKey }) => {
+  const [selId, setSelId] = React.useState(null);
+
+  React.useEffect(() => {
+    const handleNavMint = (e) => setSelId(e.detail);
+    window.addEventListener('nav-mint-stone', handleNavMint);
+    return () => window.removeEventListener('nav-mint-stone', handleNavMint);
+  }, []);
+  
+  const [artStatus, setArtStatus] = React.useState('idle'); // idle, loading, success, error
+  const [artImg, setArtImg] = React.useState(null);
+  const [loadingMsgIdx, setLoadingMsgIdx] = React.useState(0);
+
+  const [mintStatus, setMintStatus] = React.useState('idle'); // idle, minting, success
+  const [mintProgress, setMintProgress] = React.useState(0);
+
+  const combinedStones = [
+    ...data.filter(s => s.mk_grade >= 3).sort((a,b) => b.mk_grade - a.mk_grade).map(s => ({...s, isCust: false})),
+    ...custodianData.map(c => ({
+      ...c,
+      mk_grade: c.stone.grade,
+      pattern: c.stone.pattern,
+      brightness: c.stone.brightness,
+      treatmentQuality: c.stone.type,
+      isCust: true
+    }))
+  ];
+
+  const selStone = combinedStones.find(s => s.id === selId);
+  const eligibleStones = combinedStones;
+
+  const mintTimerRef = React.useRef([]);
+  const artTimerRef = React.useRef([]);
+
+  React.useEffect(() => {
+    return () => {
+      mintTimerRef.current.forEach(clearTimeout);
+      artTimerRef.current.forEach(clearTimeout);
+    };
+  }, []);
+
+  const generateArt = async () => {
+    if(!selStone) return;
+    setArtStatus('loading');
+    setArtImg(null);
+    setLoadingMsgIdx(0);
+    
+    const msgs = ['Reading stone characteristics...','Translating matrix patterns to art...','Rendering opal fire...','Composing digital certificate...','Finalising artwork...'];
+    
+    artTimerRef.current = [];
+    msgs.forEach((msg, i) => {
+      artTimerRef.current.push(setTimeout(() => {
+        setLoadingMsgIdx(i);
+      }, i * 2000));
+    });
+
+    try {
+      if (!gemKey) throw new Error("No API key");
+      
+      const payload = {
+        "contents": [{
+          "parts": [{
+            "text": `Create a dramatic, ultra-premium digital artwork for a luxury NFT certificate representing a piece of ${selStone.name} Andamooka Matrix Opal from Australia. Grade: M${selStone.mk_grade}/M9 on the AOSA Standard. Pattern: ${selStone.pattern}. Brightness: ${selStone.brightness}. The artwork should be epic and cinematic — think deep space meets ancient geology. Feature the opal's intense fire colours (${selStone.pattern}-pattern play of colour) glowing with a hyper-realistic, iridescent shimmer against a dramatic solid black background. Include subtle crystalline structures and geometric elements suggesting a futuristic blockchain certificate. Style: high-end luxury gem art, editorial photography aesthetic, black background, opal fire colours dominant. 4k resolution feel. Do not include any text, logos, or human hands in the image.`
+          }]
+        }],
+        "generationConfig": {
+          "responseModalities": ["IMAGE"],
+          "candidateCount": 1
+        }
+      };
+
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=${gemKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      
+      if (!res.ok) throw new Error("API response not ok");
+
+      const resData = await res.json();
+      const b64 = resData?.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+      if (!b64) throw new Error("No image data returned from API");
+      
+      setArtImg(`data:image/jpeg;base64,${b64}`);
+      setArtStatus('success');
+    } catch (err) {
+      console.warn("Artwork gen error", err);
+      // Fallback
+      if (selStone.id === 13 || selStone.genesisAsset) {
+        setArtImg(selStone.nft_image || "https://res.cloudinary.com/dkgqxred2/image/upload/v1777191838/openart-image_s4KRJWDf_1777191340348_raw_yssfes.png");
+      } else {
+        const color = (GRADE_COLORS[selStone.mk_grade] || '#C9A66B').replace('#','%23');
+        const nameText = encodeURIComponent(selStone.name || selStone.collection);
+        setArtImg(`data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="500" viewBox="0 0 400 500"><rect width="400" height="500" fill="%230b0d12"/><rect x="20" y="20" width="360" height="460" fill="none" stroke="${color}" stroke-width="2" opacity="0.3"/><circle cx="200" cy="200" r="80" fill="none" stroke="${color}" stroke-width="1"/><text x="200" y="220" fill="${color}" font-family="sans-serif" font-size="64" font-weight="bold" text-anchor="middle">M${selStone.mk_grade}</text><text x="200" y="380" fill="%23E6EDF3" font-family="sans-serif" font-size="20" font-weight="bold" text-anchor="middle">${nameText}</text><text x="200" y="420" fill="%238B949E" font-family="sans-serif" font-size="12" letter-spacing="4" text-anchor="middle">PROVENANCE CERTIFICATE</text></svg>`);
+      }
+      setArtStatus('error');
+    } finally {
+      artTimerRef.current.forEach(clearTimeout);
+    }
+  };
+
+  const handleMint = () => {
+    setMintStatus('minting');
+    setMintProgress(0);
+    
+    const isCust = selStone.isCust;
+    
+    // We cannot use strict intervals accurately if setStep rerenders cause clearing.
+    // Instead, let's use a chain of timeouts to ensure it finishes.
+    mintTimerRef.current = [];
+    mintTimerRef.current.push(setTimeout(() => { setMintProgress(33); }, isCust ? 1500 : 800));
+    mintTimerRef.current.push(setTimeout(() => { setMintProgress(66); }, isCust ? 3000 : 1600));
+    
+    mintTimerRef.current.push(setTimeout(() => {
+      setMintProgress(100);
+      setMintStatus('success');
+      
+      // Award XP for minting
+      if (addXp) {
+        const rarity = getRarity(selStone.mk_grade);
+        addXp(rarity.xp * 2); 
+      }
+
+      if (isCust) {
+        const fresh = custodianData.map(c => c.id === selId ? { ...c, nft: true } : c);
+        setCustodianData(fresh);
+      } else {
+        const fresh = data.map(s => s.id === selId ? {
+          ...s,
+          nft: true,
+          nft_img: artImg,
+          genesis: s.id===13 ? true : s.genesis
+        } : s);
+        setData(fresh);
+      }
+    }, isCust ? 4500 : 2200));
+  };
+
+  const msgs = ['Reading stone characteristics...','Translating matrix patterns to art...','Rendering opal fire...','Composing digital certificate...','Finalising artwork...'];
+
+  return (
+    <div className="flex flex-col gap-10 animate-[opn-fadein_0.18s_ease-out]">
+      <div className="flex justify-between items-start md:items-center">
+        <div>
+          <h2 className="text-4xl font-light text-[var(--gold)] mb-1 font-display tracking-tight">The <span className="opacity-40">Mint</span></h2>
+          <p className="text-[13px] text-[var(--muted)] font-medium uppercase tracking-[0.2em] mt-1">Create verifiable digital provenance certificates</p>
+        </div>
+        <div className="px-3 py-1 bg-[var(--surf2)] border border-[var(--bdr-hi)] rounded text-[10px] font-bold text-[var(--muted)] uppercase tracking-wide">
+          Powered by Google Gemini + Polygon
+        </div>
+      </div>
+
+      {!gemKey && (
+        <div className="bg-[var(--surf2)] border border-[var(--orange)] rounded-lg p-5 flex flex-col gap-2">
+          <div className="text-[14px] font-bold text-white">Gemini API Key Required</div>
+          <div className="text-[12px] text-[var(--muted)] mb-2">Enter your API key to generate custom NFT artworks.</div>
+          <input type="password" value={gemKey} onChange={e => {setGemKey(e.target.value); localStorage.setItem('OPN_GEMINI_KEY', e.target.value)}} className="w-full md:w-1/2 bg-[var(--bg)] border border-[var(--bdr)] rounded p-2 text-white focus:outline-none focus:border-[var(--teal)]" placeholder="AIza..." />
+        </div>
+      )}
+
+      {/* SECTION 1 - SELECT */}
+      <div>
+        <h3 className="text-[15px] font-bold text-white mb-1">Choose a Stone</h3>
+        <p className="text-[11px] text-[var(--muted)] mb-4">Only AOSA-graded stones are eligible for minting (M3+)</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          {eligibleStones.map(s => (
+            <div key={s.id} onClick={() => !s.nft && setSelId(s.id)} className={`relative bg-[var(--surf2)] rounded-lg border overflow-hidden p-2 flex flex-col gap-2 transition-all cursor-pointer ${s.nft ? 'opacity-50 cursor-not-allowed border-[var(--bdr)]' : selId === s.id ? 'border-[var(--gold)] shadow-[0_0_15px_var(--gold-dim)]' : 'border-[var(--bdr)] hover:border-[var(--bdr-hi)]'}`}>
+              <div className="w-full h-16 rounded overflow-hidden relative">
+                <img src={s.img} className="w-full h-full object-cover" />
+                <div className="absolute top-1 right-1 px-1 py-0.5 rounded text-[8px] font-bold" style={{backgroundColor: GRADE_COLORS[s.mk_grade], color:'#fff'}}>M{s.mk_grade}</div>
+              </div>
+              <div>
+                <div className="text-[11px] font-bold text-white leading-tight truncate">{s.name}</div>
+              </div>
+              {s.nft ? (
+                 <div className="mt-auto text-[10px] font-bold text-[var(--teal)] uppercase tracking-wider text-center py-1">◆ Minted</div>
+              ) : (
+                 <div className={`mt-auto text-[10px] font-bold uppercase tracking-wider text-center py-1 rounded ${selId === s.id ? 'bg-[var(--gold-dim)] text-[var(--gold)]' : 'bg-[var(--surf3)] text-[var(--muted)]'}`}>{selId === s.id ? 'Selected ✓' : 'Select'}</div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* SECTION 2 - GENERATE ARTWORK */}
+      {selStone && (
+        <div className="border-t border-[var(--bdr)] pt-8">
+           <h3 className="text-[15px] font-bold text-white mb-1">Generate NFT Artwork</h3>
+           <p className="text-[11px] text-[var(--muted)] mb-6">Google Gemini will create a unique digital artwork inspired by your stone's characteristics</p>
+           
+           <div className="flex flex-col md:flex-row gap-6">
+             <div className="flex-1 bg-[var(--surf2)] rounded-xl border border-[var(--bdr)] p-5 flex flex-col items-center">
+               <div className="w-48 h-48 rounded-lg overflow-hidden border-2 border-[var(--bdr-hi)] shadow-xl mb-6">
+                 <img src={selStone.img} className="w-full h-full object-cover" />
+               </div>
+               <div className="w-full">
+                 <h4 className="text-[22px] font-light text-[var(--gold)] text-center mb-6 font-display tracking-tight">{selStone.name}</h4>
+                 <div className="space-y-2 text-[12px] font-mono">
+                   <div className="flex justify-between"><span className="text-[var(--muted)]">Grade</span><span className="text-white">M{selStone.mk_grade} ({GRADE_COLORS[selStone.mk_grade]})</span></div>
+                   <div className="flex justify-between"><span className="text-[var(--muted)]">Pattern</span><span className="text-white">{selStone.pattern}</span></div>
+                   <div className="flex justify-between"><span className="text-[var(--muted)]">Brightness</span><span className="text-white">{selStone.brightness} ({selStone.bodyTone})</span></div>
+                   <div className="flex justify-between"><span className="text-[var(--muted)]">Treatment</span><span className="text-white">{selStone.treatmentQuality}</span></div>
+                 </div>
+               </div>
+             </div>
+
+             <div className="flex-[1.5] bg-[var(--bg)] rounded-xl border border-[var(--bdr-hi)] overflow-hidden flex flex-col">
+               <div className="flex-1 relative min-h-[300px] flex items-center justify-center p-6 bg-[#000]">
+                 {artStatus === 'idle' && (
+                   <div className="text-center">
+                     <div className="text-6xl text-[var(--dim)] mb-4">◉</div>
+                     <div className="text-[14px] text-[var(--muted)]">Ready to generate artwork</div>
+                   </div>
+                 )}
+                 {artStatus === 'loading' && (
+                   <div className="w-full h-full absolute inset-0 flex flex-col items-center justify-center" style={{background: 'linear-gradient(90deg, #1A2030 0%, #C9A66B33 50%, #1A2030 100%)', backgroundSize: '200% 100%', animation: 'opn-shimmer 2s infinite linear'}}>
+                     <style dangerouslySetInnerHTML={{__html: `@keyframes opn-shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }`}}/>
+                     <div className="w-12 h-12 border-4 border-[var(--gold)] border-t-transparent rounded-full animate-spin mb-6"></div>
+                     <div className="text-[16px] font-bold text-[var(--gold)]">{msgs[loadingMsgIdx]}</div>
+                   </div>
+                 )}
+                 {(artStatus === 'success' || artStatus === 'error') && artImg && (
+                   <div className="w-full h-full p-2 flex items-center justify-center relative">
+                     <img src={artImg} className="max-w-full max-h-[360px] rounded object-contain border border-[var(--gold)] shadow-[0_0_30px_var(--gold-dim)]" />
+                     {artStatus === 'success' && <div className="absolute top-6 left-6 px-3 py-1 bg-[var(--teal)] text-[#000] font-bold text-[10px] uppercase tracking-widest rounded-sm">◆ Artwork Generated</div>}
+                     {artStatus === 'error' && <div className="absolute top-4 left-4 right-4 text-center px-3 py-2 bg-[var(--red-dim)] border border-[var(--red)] text-white font-bold text-[11px] rounded">Custom artwork failed. Used dynamic placeholder.</div>}
+                   </div>
+                 )}
+               </div>
+               
+               <div className="p-4 border-t border-[var(--bdr-hi)] bg-[var(--surf)]">
+                 {artStatus !== 'loading' ? (
+                   <button onClick={generateArt} className="w-full py-3 rounded bg-[var(--teal)] hover:brightness-110 text-[#000] font-extrabold text-[14px] uppercase tracking-wide transition-all">
+                     {artStatus === 'idle' ? 'Generate Artwork' : 'Regenerate'}
+                   </button>
+                 ) : (
+                   <button disabled className="w-full py-3 rounded bg-[var(--surf3)] text-[var(--muted)] font-extrabold text-[14px] uppercase tracking-wide">
+                     Generating...
+                   </button>
+                 )}
+               </div>
+             </div>
+           </div>
+        </div>
+      )}
+
+      {/* SECTION 3 - MINT */}
+      {(artStatus === 'success' || artStatus === 'error') && (
+        <div className="border-t border-[var(--bdr)] pt-8">
+           <h3 className="text-[15px] font-bold text-white mb-6">Mint NFT Certificate</h3>
+           
+           <div className="flex flex-col md:flex-row gap-8 items-start">
+             <div className="w-full md:w-[480px] shrink-0 bg-[#0d1015] border border-[var(--gold-dim)] rounded-xl relative p-8 shadow-2xl" style={{backgroundImage: 'radial-gradient(circle at 50% 50%, #1a1c22 0%, #0d1015 100%)'}}>
+               <div className="absolute top-2 left-2 w-4 h-4 border-t border-l border-[var(--gold-dim)]"></div>
+               <div className="absolute top-2 right-2 w-4 h-4 border-t border-r border-[var(--gold-dim)]"></div>
+               <div className="absolute bottom-2 left-2 w-4 h-4 border-b border-l border-[var(--gold-dim)]"></div>
+               <div className="absolute bottom-2 right-2 w-4 h-4 border-b border-r border-[var(--gold-dim)]"></div>
+               
+               <div className="flex gap-6 mb-8">
+                 <div className="w-[140px] h-[140px] rounded overflow-hidden border-[2px] border-[var(--bg)] shadow-xl shrink-0">
+                   <img src={artImg} className="w-full h-full object-cover" />
+                 </div>
+                 <div className="flex flex-col justify-center">
+                   <div className="text-[8px] uppercase tracking-widest text-[var(--gold)] mb-2 font-bold">Opal Provenance Network</div>
+                   <div className="text-[20px] font-light text-white mb-1 font-display tracking-tight">Certificate of <span className="opacity-40 italic">Authenticity</span></div>
+                   <div className="text-[15px] text-[var(--muted)] mb-4 font-display font-medium tracking-wide">{selStone.name}</div>
+                   <div className="flex items-center gap-3">
+                     <span className="px-2 border border-[#fff2] text-white font-bold rounded" style={{backgroundColor: GRADE_COLORS[selStone.mk_grade]}}>M{selStone.mk_grade}</span>
+                     <span className="text-[10px] text-[var(--dim)]">Andamooka, SA</span>
+                   </div>
+                 </div>
+               </div>
+               
+               <div className="flex justify-between items-end border-t border-[#fff1] pt-4">
+                 <div className="text-[9px] text-[var(--dim)] font-mono">
+                   <div className="mb-1 text-[var(--gold)]">Matt Kathagen &middot; Miner</div>
+                   <div>Matt Rogers &middot; Cutter</div>
+                 </div>
+                 <div className="flex flex-col items-end gap-2">
+                   <div className="w-8 h-4 opacity-50"><AOSA_Logo_Scaled /></div>
+                   <div className="text-[8px] font-mono text-[var(--muted)] tracking-wider">OPN-{selStone.id}-2026-{Math.floor(1000+Math.random()*9000)}</div>
+                 </div>
+               </div>
+             </div>
+
+             <div className="flex-1 w-full bg-[var(--surf)] border border-[var(--bdr-hi)] rounded-xl p-6">
+               <div className="space-y-4 mb-8">
+                 <div className="flex justify-between border-b border-[var(--bdr)] pb-2"><span className="text-[var(--muted)] text-[12px]">Network</span><span className="text-white font-mono text-[12px]">Polygon</span></div>
+                 <div className="flex justify-between border-b border-[var(--bdr)] pb-2"><span className="text-[var(--muted)] text-[12px]">Gas Fee</span><span className="text-[var(--teal)] font-mono text-[12px]">0.001 MATIC</span></div>
+                 <div className="flex justify-between border-b border-[var(--bdr)] pb-2"><span className="text-[var(--muted)] text-[12px]">Royalty</span><span className="text-white font-mono text-[12px]">5% perpetual</span></div>
+               </div>
+
+               {mintStatus === 'idle' && (
+                 <button onClick={handleMint} className="w-full py-4 rounded-lg shadow-[0_0_20px_var(--teal-dim)] hover:scale-[1.02] transition-transform" style={{background: 'linear-gradient(135deg, var(--gold), var(--teal))'}}>
+                   <div className="text-[26px] font-light text-white text-center font-display tracking-tight leading-none">MINT TO POLYGON</div>
+                 </button>
+               )}
+
+               {mintStatus === 'minting' && (
+                 <div className="w-full h-24 border border-[var(--bdr-hi)] bg-[var(--surf2)] rounded-lg flex flex-col items-center justify-center relative overflow-hidden">
+                   <div className="absolute top-0 left-0 h-1 bg-[var(--teal)] transition-all duration-300" style={{width: `${mintProgress}%`}}></div>
+                   <div className="text-[14px] font-bold text-[var(--teal)] mb-2 text-center px-4 leading-tight">
+                     {selStone.isCust ? (
+                        mintProgress < 50 ? <span className="whitespace-pre-line">Preparing Genesis Certificate...{'\n'}<span className="text-[10px] text-[var(--muted)] font-mono">Synchronising provenance chain</span></span> :
+                        mintProgress < 100 ? <span className="whitespace-pre-line">Embedding coordinates & provenance...{'\n'}<span className="text-[10px] text-[var(--muted)] font-mono">-30.454699, 137.189437</span></span> :
+                        'Broadcasting to Polygon...'
+                     ) : (
+                        mintProgress < 50 ? 'Preparing certificate...' : 
+                        mintProgress < 100 ? 'Broadcasting to Polygon...' : 
+                        'Confirming...'
+                     )}
+                   </div>
+                   {mintProgress >= 33 && mintProgress < 100 && (
+                     <div className="flex gap-2">
+                       <div className="w-2 h-2 bg-[var(--teal)] rounded-sm animate-ping delay-100"></div>
+                       <div className="w-2 h-2 bg-[var(--teal)] rounded-sm animate-ping delay-200"></div>
+                       <div className="w-2 h-2 bg-[var(--teal)] rounded-sm animate-ping delay-300"></div>
+                     </div>
+                   )}
+                 </div>
+               )}
+
+               {mintStatus === 'success' && (
+                 <div className="w-full border border-[var(--teal)] bg-[var(--teal-dim)] rounded-lg p-6 flex flex-col items-center animate-[opn-fadein_0.3s_ease-out]">
+                   <div className="text-[48px] text-[var(--teal)] leading-none mb-4">◆</div>
+                   {selStone.isCust ? (
+                     <>
+                       <h4 className="text-[24px] font-light text-[var(--teal)] mb-1 text-center font-display tracking-tight">Genesis NFT <span className="opacity-40">Minted</span></h4>
+                       <div className="text-[12px] font-bold text-white mb-2 text-center">The first asset ever certified on the Opal Provenance Network</div>
+                       <div className="text-[11px] text-[var(--muted)] mb-4 text-center">Serial No. 1 of 20 — Cobra Cuff<br/>Certificate ID: COBRA-CC-001-OPN-2026</div>
+                       <div className="text-[42px] font-light text-[var(--gold)] leading-none mb-8 font-display tracking-tighter text-center drop-shadow-[0_0_15px_rgba(201,166,107,0.3)]">{formatCur(selStone.nft_value)}</div>
+                       <div className="text-[10px] text-[var(--teal)] text-center max-w-[200px] leading-relaxed mb-6">Embedded: GPS coordinates &middot; M9 AOSA Grade &middot; Provenance chain &middot; Broadcast provenance</div>
+                     </>
+                   ) : (
+                     <>
+                       <h4 className="text-[28px] font-light text-[var(--teal)] mb-6 text-center font-display tracking-tight">NFT Minted Successfully</h4>
+                       <div className="text-[48px] font-light text-[var(--gold)] leading-none mb-10 font-display tracking-tighter text-center drop-shadow-[0_0_15px_rgba(201,166,107,0.3)]">{formatCur(selStone.nft_value || selStone.listPrice || (selStone.mr_offer ? selStone.mr_offer*1.8 : 0) || 2000)}</div>
+                       <button onClick={() => window.dispatchEvent(new CustomEvent('nav-nft'))} className="w-full py-3 mb-3 rounded bg-[var(--gold)] text-[#000] font-bold text-[14px] hover:brightness-110">View in NFT Collection &rarr;</button>
+                       <button className="w-full py-2 rounded border border-[var(--teal)] text-[var(--teal)] hover:bg-[var(--teal-dim)] font-bold text-[12px]">Share Certificate</button>
+                     </>
+                   )}
+                 </div>
+               )}
+             </div>
+           </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const CustodianView = ({ custodianData, setView }) => {
+  const asset = custodianData[0]; // Currently targeting the first asset
+
+  const mintClick = () => {
+    setView('Mint');
+    setTimeout(() => window.dispatchEvent(new CustomEvent('nav-mint-stone', { detail: asset.id })), 100);
+  };
+
+  return (
+    <div className="flex flex-col gap-12 animate-[opn-fadein_0.18s_ease-out] pb-10">
+      {/* HERO SECTION */}
+      <div className="w-full bg-[#08090a] rounded-xl border border-[var(--gold-dim)] overflow-hidden flex flex-col lg:flex-row shadow-[0_0_50px_rgba(201,166,107,0.05)]">
+        <div className="w-full lg:w-1/2 p-8 flex items-center justify-center relative min-h-[300px]">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#08090b] hidden lg:block z-10"></div>
+          <img src={asset.img} className="max-w-[400px] w-full object-contain relative z-0 filter drop-shadow-[0_0_20px_rgba(201,166,107,0.3)] rounded-lg border border-[var(--gold-dim)]" />
+        </div>
+        <div className="w-full lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center relative z-20 bg-[#08090b]">
+          <div className="text-[11px] uppercase tracking-[0.3em] text-[var(--gold)] font-medium mb-2 font-display">Cobra Cuff ™</div>
+          <h1 className="text-[42px] font-light text-[#FFF1D0] leading-none mb-1 font-display tracking-tight">{asset.collection}</h1>
+          <div className="text-[18px] font-medium text-[var(--gold)] mb-6 font-display opacity-80">No. {asset.serialNumber} of {asset.totalEdition}</div>
+          
+          <div className="inline-block border border-[var(--red)] text-[var(--red)] px-3 py-1 rounded text-[10px] font-bold uppercase tracking-widest mb-8 self-start bg-[var(--red-dim)] shadow-[0_0_10px_var(--red-dim)]">
+            {asset.status}
+          </div>
+
+          <div className="bg-[var(--surf)] border border-[var(--bdr-hi)] rounded-lg p-5 mb-8">
+            <div className="flex justify-between items-end border-b border-[var(--bdr)] pb-4 mb-4">
+              <div className="text-[10px] uppercase font-bold text-[var(--muted)] tracking-[0.2em] font-display">Retail Value</div>
+              <div className="text-[20px] font-light text-[var(--text)] text-right font-display leading-none tracking-tight">${(asset.retailPrice || 0).toLocaleString()} <span className="text-[11px] font-bold opacity-40 ml-1 font-sans">AUD</span></div>
+            </div>
+            <div className="flex justify-between items-end">
+              <div className="text-[10px] uppercase font-bold text-[var(--muted)] tracking-[0.2em] font-display">NFT Estimate</div>
+              <div className="text-[28px] font-light text-[var(--gold)] text-right shadow-[0_0_15px_var(--gold-dim)] font-display leading-none tracking-tight">${(asset.nft_value || 0).toLocaleString()} <span className="text-[11px] font-bold opacity-40 ml-1 font-sans">AUD</span></div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded overflow-hidden flex items-center justify-center font-light text-[24px] shadow-[0_0_20px_var(--teal-dim)] border border-[#fff2] shrink-0 font-display" style={{backgroundColor: GRADE_COLORS[asset.stone.grade], color: '#fff'}}>
+              M{asset.stone.grade}
+            </div>
+            <div className="text-[13px] text-[var(--muted)] leading-relaxed font-medium">
+              <strong className="text-white block mb-1 font-display tracking-tight text-[15px]">{asset.stone.carats}ct {asset.stone.type}</strong>
+              <span className="uppercase tracking-widest text-[10px] opacity-60">{asset.stone.pattern} &middot; {asset.stone.brightness}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* PROVENANCE CHAIN */}
+      <div className="bg-[var(--surf)] rounded-xl border border-[var(--bdr)] p-8 overflow-x-auto custom-scrollbar">
+        <h3 className="text-[14px] font-semibold text-[var(--text)] mb-6 font-display uppercase tracking-widest opacity-60">Provenance & Assembly Log</h3>
+        <div className="flex items-start min-w-[800px]">
+          {asset.provenance.map((p, i) => (
+            <div key={i} className="flex-1 relative">
+               {i < asset.provenance.length - 1 && (
+                 <div className="absolute top-4 left-8 right-0 h-[1px] bg-[var(--gold)] opacity-30"></div>
+               )}
+               <div className="flex flex-col items-start gap-3 relative z-10 pr-6">
+                 <div className={`w-10 h-10 rounded-full flex items-center justify-center text-[12px] font-bold font-display ${p.label === 'Mint Pending' ? 'bg-[var(--bg)] border-2 border-[var(--gold)] text-[var(--gold)] animate-pulse' : 'bg-[var(--gold)] text-[#000]'}`}>
+                   {p.step}
+                 </div>
+                 <div>
+                   <div className={`text-[12px] font-bold font-display uppercase tracking-wider ${p.label === 'Mint Pending' ? 'text-[var(--gold)]' : 'text-white'}`}>{p.label}</div>
+                   <div className="text-[10px] text-[var(--muted)] mt-1 font-medium">{p.detail}</div>
+                   <div className="text-[9px] text-[var(--dim)] mt-2 font-mono uppercase tracking-widest">{p.date || p.coords}</div>
+                 </div>
+               </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* GPS MAP */}
+        <div className="bg-[var(--surf)] rounded-xl border border-[var(--gold-dim)] overflow-hidden flex flex-col">
+          <div className="p-4 bg-[var(--surf2)] border-b border-[var(--gold-dim)]">
+            <h3 className="text-[13px] font-bold text-[var(--gold)] mb-1">Origin Coordinates Verified</h3>
+            <p className="text-[10px] text-[var(--muted)] font-mono">{asset.stone.mine} &middot; {asset.stone.location} &middot; 30°27'17"S 137°11'22"E</p>
+          </div>
+          <div className="w-full h-48 relative border-t border-[var(--bdr)]">
+            <img src={`https://staticmap.openstreetmap.de/staticmap.php?center=${asset.stone.coordinates.lat},${asset.stone.coordinates.lng}&zoom=14&size=600x200&markers=${asset.stone.coordinates.lat},${asset.stone.coordinates.lng},red`} className="w-full h-full object-cover opacity-80 filter brightness-75 contrast-125" />
+            <div className="absolute bottom-2 right-2 bg-[#000a] text-[9px] px-2 py-1 rounded text-[var(--muted)] border border-[#fff2]">Verified mine-site coordinates embedded in NFT metadata</div>
+          </div>
+        </div>
+
+        {/* STONE CERTIFICATE CARD */}
+        <div className="bg-[var(--surf)] rounded-xl border border-[var(--teal-dim)] overflow-hidden flex flex-col">
+           <div className="p-4 bg-[var(--surf2)] border-b border-[var(--teal-dim)]">
+            <h3 className="text-[13px] font-bold text-[var(--teal)] mb-1">AOSA Stone Certificate</h3>
+            <p className="text-[10px] text-[var(--muted)]">Certified under AOSA Andamooka Standard v1.0</p>
+          </div>
+          <div className="p-6 flex-1 flex flex-col justify-center gap-4 text-[12px] text-[var(--muted)] leading-relaxed bg-[var(--bg)]">
+            <div className="flex items-center gap-4">
+              <div className="px-3 py-1 text-[16px] rounded border border-[#fff4] text-white font-bold" style={{backgroundColor: GRADE_COLORS[asset.stone.grade]}}>M{asset.stone.grade}</div>
+              <div>
+                <span className="text-white font-bold block">{asset.stone.pattern} Pattern &middot; {asset.stone.brightness} Brightness</span>
+              </div>
+            </div>
+            <div className="p-4 bg-[var(--surf2)] rounded border border-[var(--bdr-hi)] shadow-inner">
+              <div className="mb-2"><strong className="text-white">Extracted, treated & set by:</strong> {asset.stone.miner}</div>
+              <div><strong className="text-white">Status:</strong> {asset.stone.type}</div>
+            </div>
+            <div className="text-[9px] uppercase font-bold tracking-widest text-center mt-2 opacity-50 border-t border-[var(--bdr)] pt-4">Opal Provenance Network</div>
+          </div>
+        </div>
+      </div>
+
+      {/* EDITION TRACKER */}
+      <div className="bg-[var(--surf)] rounded-xl border border-[var(--bdr)] p-6 md:p-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4">
+           <div>
+              <h3 className="text-2xl font-light text-white mb-1 font-display tracking-tight">{asset.collection} <span className="opacity-40">Edition Tracker</span></h3>
+              <p className="text-[12px] text-[var(--muted)] font-medium uppercase tracking-[0.2em] mt-2">18 of 20 available for public acquisition</p>
+           </div>
+           <div className="bg-[var(--surf2)] border border-[var(--gold-dim)] px-4 py-2 rounded text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--gold)] font-display">
+              SOLD: 2 &middot; AVAILABLE: 18 &middot; MINTED: {asset.nft ? '1' : '0'}
+           </div>
+        </div>
+        
+        <div className="grid grid-cols-4 sm:grid-cols-5 lg:grid-cols-10 gap-2">
+          {[...Array(20)].map((_, i) => {
+            const isNo1 = i === 0;
+            const isNo2 = i === 1;
+            return (
+              <div key={i} className={`aspect-square rounded border flex flex-col items-center justify-center p-1 text-center relative overflow-hidden ${isNo1 ? 'border-[var(--gold)] bg-[var(--surf2)] shadow-[0_0_10px_var(--gold-dim)]' : isNo2 ? 'border-[var(--bdr-hi)] bg-[var(--surf2)]' : 'border-[var(--bdr)] bg-[var(--bg)] opacity-60 hover:opacity-100 transition-opacity'}`}>
+                {isNo1 && <img src={asset.img} className="absolute inset-0 w-full h-full object-cover opacity-30" />}
+                <div className={`text-[16px] font-mono font-bold relative z-10 ${isNo1 ? 'text-[var(--gold)]' : 'text-[var(--muted)]'}`}>
+                  {String(i + 1).padStart(2, '0')}
+                </div>
+                {isNo1 && <div className="text-[9px] font-bold text-[var(--red)] uppercase mt-1 relative z-10 tracking-widest">HELD</div>}
+                {isNo2 && <div className="text-[8px] font-bold text-[var(--dim)] uppercase mt-1 relative z-10 tracking-widest">RESERVED</div>}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* MINT BUTTON */}
+      {!asset.nft ? (
+        <button onClick={mintClick} className="w-full flex flex-col items-center justify-center py-8 rounded-xl hover:scale-[1.01] transition-transform shadow-[0_0_30px_var(--teal-dim)]" style={{background: 'linear-gradient(135deg, var(--gold), var(--teal))'}}>
+          <div className="text-[28px] md:text-[32px] font-light text-white mb-2 leading-none text-center font-display tracking-tight">◉ MINT GENESIS NFT — No. 1 of 20</div>
+          <div className="text-[14px] font-semibold text-[#0B0D12] opacity-80 mb-1 text-center font-display uppercase tracking-wider">This will be the first asset ever minted on the OPN</div>
+          <div className="text-[12px] text-[#0B0D12] opacity-60 font-medium text-center">The minting process will be broadcast on Outback Opal Hunters</div>
+        </button>
+      ) : (
+         <div className="w-full border border-[var(--teal)] bg-[var(--teal-dim)] rounded-xl py-8 flex flex-col items-center shadow-[0_0_30px_var(--teal-dim)] animate-[opn-fadein_0.3s_ease-out]">
+           <div className="text-[24px] font-medium text-[var(--teal)] mb-1 uppercase tracking-widest font-display">◆ Genesis NFT Minted</div>
+           <div className="text-[14px] text-white opacity-80 font-mono">Certificate ID: COBRA-CC-001-OPN-2026</div>
+         </div>
+      )}
+    </div>
+  );
+};
+
+const App = () => {
+  const [user, setUser] = useState(null);
+  const [data, setData] = useState(() => {
+    try {
+      const saved = localStorage.getItem('opn-v3-stones');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Only keep if it matches our seed count and doesn't have extra IDs
+        if (parsed.length === 12 && !parsed.some(s => s.id > 12)) return parsed;
+      }
+    } catch(e) {}
+    return DEFAULT_STONES;
+  });
+
+  const [custodianData, setCustodianData] = useState(() => {
+    try {
+      const saved = localStorage.getItem('opn-v3-custodian');
+      if (saved) return JSON.parse(saved);
+    } catch(e) {}
+    return CUSTODIAN_ASSETS;
+  });
+  const [view, setView] = useState('Portfolio');
+  const [selectedId, setSelectedId] = useState(null);
+  const [mintingStone, setMintingStone] = useState(null);
+  const [verifyAIOpen, setVerifyAIOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const [userProfile, setUserProfile] = useState(() => {
+    try {
+      const saved = localStorage.getItem('opn-v3-profile');
+      if (saved) return JSON.parse(saved);
+    } catch(e) {}
+    return {
+      xp: 0,
+      level: 1,
+      energy: 10,
+      maxEnergy: 10,
+      collections: {
+        genesis: 1,
+        andamookaOrigins: 0
+      }
+    };
+  });
+
+  useEffect(() => {
+    localStorage.setItem('opn-v3-profile', JSON.stringify(userProfile));
+  }, [userProfile]);
+
+  const addXp = (amount) => {
+    setUserProfile(prev => {
+      const newXp = prev.xp + amount;
+      const nextLevelXp = prev.level * 1000;
+      if (newXp >= nextLevelXp) {
+        return {
+          ...prev,
+          xp: newXp - nextLevelXp,
+          level: prev.level + 1,
+          energy: prev.maxEnergy 
+        };
+      }
+      return { ...prev, xp: newXp };
+    });
+  };
+
+  const useEnergy = (amount = 1) => {
+    if (userProfile.energy < amount) return false;
+    setUserProfile(prev => ({ ...prev, energy: prev.energy - amount }));
+    return true;
+  };
+
+  // Check for Env Keys (for the "check" the user requested)
+  const hasGeminiEnv = !!(typeof process !== 'undefined' && process.env && process.env["OPN_GEMINI_KEY"]);
+  const hasAnthropicEnv = !!(typeof process !== 'undefined' && process.env && process.env.OPN_ANTHROPIC_KEY);
+
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [gemKey, setGemKey] = useState(localStorage.getItem('OPN_GEMINI_KEY') || localStorage.getItem('OPN_GEMINI_KEY') || '');
+  const [antKey, setAntKey] = useState(localStorage.getItem('OPN_ANTHROPIC_KEY') || '');
+
+  // Energy Recovery Logic
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setUserProfile(prev => {
+        if (prev.energy >= prev.maxEnergy) return prev;
+        return {
+          ...prev,
+          energy: Math.min(prev.energy + 1, prev.maxEnergy)
+        };
+      });
+    }, 60000); // 1 energy per minute
+    return () => clearInterval(timer);
+  }, []);
+  
+  // Link env keys if present and local is empty
+  useEffect(() => {
+    if (hasGeminiEnv && !gemKey) setGemKey('PROVIDED_BY_SYSTEM');
+    if (hasAnthropicEnv && !antKey) setAntKey('PROVIDED_BY_SYSTEM');
+  }, [hasGeminiEnv, hasAnthropicEnv]);
+
+  useEffect(() => {
+    localStorage.setItem('opn-v3-stones', JSON.stringify(data));
+    setSaving(true);
+    const t = setTimeout(() => setSaving(false), 2000);
+    return () => clearTimeout(t);
+  }, [data]);
+
+  useEffect(() => {
+    localStorage.setItem('opn-v3-custodian', JSON.stringify(custodianData));
+  }, [custodianData]);
+
+  useEffect(() => {
+    const handleNav = () => setView('NFTs');
+    window.addEventListener('nav-nft', handleNav);
+    return () => window.removeEventListener('nav-nft', handleNav);
+  }, []);
+
+  const handleMint = (stone) => {
+    const fresh = data.map(s => s.id === stone.id ? { ...s, nft: true, genesis: s.id === 13 ? true : s.genesis, nft_img: s.id === 13 ? s.nft_img : s.img } : s);
+    setData(fresh);
+    setMintingStone(null);
+    if(view !== 'NFTs') {
+      setView('NFTs');
+      setSelectedId(null);
+    }
+  };
+
+  const selectedStone = data.find(s => s.id === selectedId);
+
+  if (!user) return <AuthGate setLogin={setUser} />;
+
+  return (
+    <>
+      {mintingStone && <MintModal stone={mintingStone} nftVal={mintingStone.nft_value} onCancel={() => setMintingStone(null)} onConfirm={() => handleMint(mintingStone)} />}
+      
+      {mobileMenuOpen && (
+        <div 
+          className="md:hidden fixed inset-0 bg-black/60 z-30 backdrop-blur-sm" 
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+      <aside style={{ width: '240px', minWidth: '240px', flexShrink: 0, height: '100vh', overflowY: 'auto', background: 'var(--surf)', borderRight: '1px solid var(--bdr-hi)' }} className={`fixed md:relative flex-col z-40 transition-transform duration-300 md:translate-x-0 ${mobileMenuOpen ? 'translate-x-0 flex' : '-translate-x-full md:flex'}`}>
+        <div style={{ padding: '24px 20px', borderBottom: '1px solid var(--bdr)' }} className="flex justify-between items-center">
+          <div style={{ height: '28px' }}><AOSA_Logo_Scaled /></div>
+          <button className="md:hidden text-[var(--dim)] p-2 text-lg leading-none" onClick={() => setMobileMenuOpen(false)}>✕</button>
+        </div>
+        
+        <div className="glass-card m-4 p-5 rounded-2xl border border-[var(--bdr-hi)] shadow-xl relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-[var(--gold-dim)] to-transparent opacity-50"></div>
+          <div className="relative">
+            <div className="flex justify-between items-end mb-2">
+              <div className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--gold)] font-display">Level {userProfile.level}</div>
+              <div className="text-[9px] font-mono text-[var(--dim)]">{userProfile.xp} / {userProfile.level * 1000} XP</div>
+            </div>
+            <div className="w-full h-1.5 bg-black/40 rounded-full overflow-hidden mb-4 border border-white/5">
+              <div className="h-full bg-gradient-to-r from-[var(--gold)] to-[var(--teal)] transition-all duration-700" style={{ width: `${(userProfile.xp / (userProfile.level * 1000)) * 100}%` }}></div>
+            </div>
+            <div className="flex justify-between items-center mb-4">
+               <div className="flex gap-1">
+                 {[...Array(userProfile.maxEnergy)].map((_, i) => (
+                   <div key={i} className={`w-1.5 h-3 rounded-sm ${i < userProfile.energy ? 'bg-[var(--teal)] shadow-[0_0_5px_var(--teal)]' : 'bg-white/5'}`}></div>
+                 ))}
+               </div>
+               <div className="text-[9px] font-bold text-[var(--teal)] uppercase tracking-widest">{userProfile.energy} Energy</div>
+            </div>
+            <div className="text-[8px] font-bold tracking-[0.2em] uppercase text-[var(--muted)] mb-2">{user.id === 'mattk' ? 'MINER BOOK' : 'CUTTER OFFER BOOK'}</div>
+            <div className="text-[24px] font-light font-display text-[var(--text)] tracking-tight leading-none mb-1 group-hover:text-[var(--gold)] transition-colors">
+              {formatCur(data.reduce((sum, s) => sum + (user.id === 'mattk' ? s.mk_rough_total : (s.mr_offer || 0)), 0))}
+            </div>
+            <div className="text-[9px] text-[var(--teal)] font-bold flex items-center gap-1.5 mt-2">
+              <span className="w-1 h-1 rounded-full bg-[var(--teal)] animate-pulse"></span>
+              +14% VS MARKET
+            </div>
+          </div>
+        </div>
+
+        <nav style={{ flex: 1, padding: '0 4px' }} className="overflow-y-auto custom-scrollbar">
+          {[
+            { label: 'Portfolio Analytics', icon: '◈', route: 'Portfolio', group: null },
+            { label: 'Asset Directory', icon: '⊟', route: 'Directory', group: null },
+            { label: 'Marketplace', icon: '⊛', route: 'Marketplace', group: null },
+            { label: 'Cobra Cuff', icon: <img src="https://res.cloudinary.com/dkgqxred2/image/upload/v1777209434/COBRA-ORNGE-LOGO_fkgc2s.png" style={{ height: '24px', objectFit: 'contain' }} alt="Cobra Cuff"/>, route: 'Custodian', group: 'COLLECTIONS' },
+            { label: 'Divergence Desk', icon: '⌖', route: 'Divergence', group: 'MODELS' },
+            { label: 'Miner Projection', icon: '◐', route: 'Miner', group: 'MODELS' },
+            { label: 'Cutter Yield', icon: '◑', route: 'Cutter', group: 'MODELS' },
+            { label: 'NFT Collection', icon: '◆', route: 'NFTs', group: 'SYSTEM' },
+            { label: 'The Mint', icon: '◉', route: 'Mint', group: 'SYSTEM' },
+            { label: 'Benchmark Data', icon: '◫', route: 'Benchmark', group: 'SYSTEM' },
+          ].map((item, i, arr) => {
+            const showHeader = item.group && (i === 0 || arr[i - 1].group !== item.group);
+            const active = view === item.route;
+            const itemColor = active ? user.color : 'var(--muted)';
+            return (
+              <React.Fragment key={item.route}>
+                {showHeader && <div className="text-[9px] font-bold tracking-[0.2em] uppercase text-[var(--dim)] px-5 pt-8 pb-2 font-display">{item.group}</div>}
+                <div onClick={() => { setView(item.route); setMobileMenuOpen(false); }} 
+                  style={{ 
+                    height: '42px', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '12px', 
+                    padding: '0 16px', 
+                    borderRadius: '10px', 
+                    margin: '2px 12px', 
+                    fontSize: '13px', 
+                    cursor: 'pointer', 
+                    transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)',
+                    background: active ? `${user.color}15` : 'transparent', 
+                    color: active ? 'var(--text)' : 'var(--muted)',
+                    border: active ? `1px solid ${user.color}30` : '1px solid transparent',
+                    fontWeight: active ? 600 : 400
+                  }} 
+                  className="hover:bg-white/[0.04] hover:text-white group"
+                >
+                  <span className="w-5 text-center opacity-70 text-lg flex justify-center group-hover:scale-110 transition-transform" style={active ? {color: user.color} : {}}>{item.icon}</span> 
+                  <span className="tracking-tight">{item.label}</span>
+                  {active && <div className="ml-auto w-1 h-1 rounded-full" style={{backgroundColor: user.color}}></div>}
+                </div>
+              </React.Fragment>
+            );
+          })}
+        </nav>
+
+        <div className="p-6 border-t border-[var(--bdr-hi)] space-y-6">
+          <div className="bg-white/[0.03] rounded-2xl p-4 border border-[var(--bdr)] transition-all hover:bg-white/[0.05]" onClick={() => setSettingsOpen(!settingsOpen)}>
+            <div className="flex justify-between items-center text-[10px] font-bold text-[var(--dim)] tracking-widest uppercase hover:text-[var(--muted)] cursor-pointer">
+              <span>Expert Config</span>
+              <span className="text-[8px] transition-transform" style={{transform: settingsOpen ? 'rotate(180deg)' : 'rotate(0deg)'}}>&darr;</span>
+            </div>
+            {settingsOpen && (
+              <div className="flex flex-col gap-4 mt-5" onClick={e => e.stopPropagation()}>
+                <div className="space-y-1.5">
+                  <div className="text-[9px] uppercase tracking-wider text-[var(--dim)] font-bold flex justify-between">
+                    <span>Anthropic</span>
+                    {antKey ? <span className="text-[var(--teal)] font-bold uppercase">Active</span> : <span>Offline</span>}
+                  </div>
+                  <input type="password" value={antKey} onChange={e => {setAntKey(e.target.value); localStorage.setItem('OPN_ANTHROPIC_KEY', e.target.value)}} className="w-full bg-black/40 border border-[var(--bdr)] rounded-lg px-3 py-2 text-[11px] text-white focus:outline-none focus:border-[var(--gold)] focus:ring-1 focus:ring-[var(--gold-dim)] font-mono transition-all" placeholder="sk-ant-..." />
+                </div>
+                <div className="space-y-1.5">
+                  <div className="text-[9px] uppercase tracking-wider text-[var(--dim)] font-bold flex justify-between">
+                    <span>Gemini AI</span>
+                    {gemKey ? <span className="text-[var(--teal)] font-bold uppercase">Active</span> : <span>Offline</span>}
+                  </div>
+                  <input type="password" value={gemKey} onChange={e => {setGemKey(e.target.value); localStorage.setItem('OPN_GEMINI_KEY', e.target.value)}} className="w-full bg-black/40 border border-[var(--bdr)] rounded-lg px-3 py-2 text-[11px] text-white focus:outline-none focus:border-[var(--gold)] focus:ring-1 focus:ring-[var(--gold-dim)] font-mono transition-all" placeholder="AIza..." />
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <div className="flex items-center gap-4 group cursor-pointer" onClick={()=>setUser(null)}>
+            <div className="w-10 h-10 rounded-full flex items-center justify-center font-medium font-display text-[12px] bg-opacity-20 shadow-lg border transition-transform group-hover:scale-105" style={{ color: user.color, background: `${user.color}11`, borderColor: `${user.color}33` }}>{user.initials}</div>
+            <div className="flex-1">
+              <div className="text-[13px] font-semibold text-[var(--text)] tracking-tight">{user.name.split(' ')[0]}</div>
+              <div className="text-[10px] text-[var(--dim)] font-bold uppercase tracking-widest group-hover:text-[var(--muted)] transition-colors">Sign Out &rarr;</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main style={{ flex: 1, minWidth: 0, height: '100vh', overflowY: 'auto', background: 'var(--bg)', display: 'flex', flexDirection: 'column' }} className="relative z-10 shrink shadow-[-20px_0_40px_rgba(0,0,0,0.5)]">
+        <header style={{ height: '60px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px', background: 'var(--bg)', borderBottom: '1px solid var(--bdr-hi)', position: 'sticky', top: 0, zIndex: 20 }} className="glass-card">
+          <div className="flex items-center gap-4 shrink-0">
+            <button className="md:hidden text-[var(--muted)] hover:text-white" onClick={() => setMobileMenuOpen(true)}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+            </button>
+            <div className="text-[13px] font-medium font-display text-[var(--text)] uppercase tracking-[0.2em] opacity-80">{view === 'NFTs' ? 'NFT Collection' : view === 'Mint' ? 'The Mint' : view}</div>
+          </div>
+          
+          <div className="hidden lg:flex gap-1.5 bg-black/20 p-1 rounded-full border border-[var(--bdr)] mx-8">
+            {[
+              { label: 'Portfolio', route: 'Portfolio' },
+              { label: 'Directory', route: 'Directory' },
+              { label: 'Marketplace', route: 'Marketplace' },
+              { label: 'Custodian', route: 'Custodian' },
+              { label: 'Divergence', route: 'Divergence' },
+              { label: 'NFTs', route: 'NFTs' },
+              { label: 'Mint', route: 'Mint' }
+            ].map(t => {
+              const active = view === t.route;
+              return (
+                <div key={t.route} onClick={() => setView(t.route)} className={`px-4 py-1.5 rounded-full text-[11px] font-semibold cursor-pointer transition-all ${active ? 'bg-white text-black shadow-lg scale-105' : 'text-[var(--dim)] hover:text-[var(--muted)]'}`}>
+                  {t.label}
+                </div>
+              );
+            })}
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '10px', color: 'var(--muted)', fontWeight: 600 }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div className="w-2 h-2 rounded-full shadow-[0_0_8px_currentColor]" style={{ backgroundColor: saving ? 'var(--orange)' : 'var(--teal)', color: saving ? 'var(--orange)' : 'var(--teal)', opacity: saving ? 0.8 : 1 }}></div>
+              <span className="font-mono tracking-tighter">{saving ? 'SYNCING...' : 'SYNCED'}</span>
+            </span>
+            <span className="font-mono opacity-60 tracking-widest hidden sm:inline">{new Date().toLocaleTimeString('en-US',{hour12:false})}</span>
+          </div>
+        </header>
+
+        <div className="flex-1 overflow-y-auto p-6 md:pb-6 pb-24 relative custom-scrollbar">
+          {view === 'Portfolio'  && <PortfolioView data={data} user={user} onSelect={setSelectedId} profile={userProfile} />}
+          {view === 'Directory'  && <DirectoryView data={data} user={user} onSelect={setSelectedId} onMint={setMintingStone} />}
+          {view === 'Marketplace'&& <MarketplaceView data={data} user={user} onSelect={setSelectedId} />}
+          {view === 'Custodian'  && <CustodianView custodianData={custodianData} setView={setView} />}
+          {view === 'Divergence' && <DivergenceView data={data} onSelect={setSelectedId} />}
+          {view === 'NFTs'       && <NFTCollectionView data={data} setView={setView} onSelect={setSelectedId} />}
+          {view === 'Mint'       && <TheMintView data={data} setData={setData} custodianData={custodianData} setCustodianData={setCustodianData} addXp={addXp} gemKey={gemKey} />}
+          {view === 'Miner'      && <MinerProjectionView data={data} onSelect={setSelectedId} />}
+          {view === 'Cutter'     && <CutterYieldView data={data} onSelect={setSelectedId} />}
+          {view === 'Benchmark'  && <BenchmarkDataView />}
+        </div>
+      </main>
+
+      {/* Mobile Navigation */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-[var(--surf2)] border-t border-[var(--bdr)] flex items-center justify-around px-2 z-50 shadow-[0_-5px_20px_rgba(0,0,0,0.5)] overflow-x-auto">
+        {[
+          { icon: '◈', route: 'Portfolio', label: 'Portfolio' },
+          { icon: '⊟', route: 'Directory', label: 'Directory' },
+          { icon: '⊛', route: 'Marketplace', label: 'Marketplace' },
+          { icon: '⌖', route: 'Divergence', label: 'Divergence' },
+          { icon: '◉', route: 'Mint', label: 'Mint' },
+        ].map((v) => {
+          const active = view === v.route;
+          return (
+            <button key={v.route} onClick={() => setView(v.route)} className={`flex flex-col flex-shrink-0 items-center justify-center gap-1 w-16 h-12 rounded-lg transition-colors ${active ? 'text-[var(--text)]' : 'text-[var(--muted)]'}`} style={active ? {color: user.color} : {}}>
+              <span className="text-xl leading-none">{v.icon}</span>
+              <span className="text-[8px] font-bold tracking-wider uppercase truncate w-full text-center">{v.label}</span>
+            </button>
+          );
+        })}
+      </nav>
+
+      <DetailPanel stone={selectedStone} user={user} onClose={() => setSelectedId(null)} onMint={setMintingStone} />
+      {view !== 'Mint' && <VerifyAIFAB onClick={() => setVerifyAIOpen(true)} energy={userProfile.energy} />}
+      {verifyAIOpen && <VerifyAIModal onClose={() => setVerifyAIOpen(false)} addXp={addXp} useEnergy={useEnergy} energy={userProfile.energy} gemKey={gemKey} setData={setData} data={data} />}
+    </>
+  );
+};
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+
+
+</script>
+</body>
+</html>
